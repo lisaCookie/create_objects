@@ -17,6 +17,7 @@ from RECIPES.categories.object_movement import object_movement_bp
 from dotenv import load_dotenv
 import os
 import sqlite3
+from datetime import datetime
 
 load_dotenv()
 
@@ -123,6 +124,18 @@ def create_category():
         except sqlite3.IntegrityError:
             flash(f'Category "{category_name}" already exists.')
         return redirect(url_for('index'))
+    
+@app.template_filter('format_datetime')
+def format_datetime(value, fmt='%d.%m.%Y'):
+    if isinstance(value, str):
+        try:
+            dt = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            return value
+        return dt.strftime(fmt)
+    elif isinstance(value, datetime):
+        return value.strftime(fmt)
+    return ''
 
 if __name__ == "__main__":
     from RECIPES.users.work_db_users import init_users_table

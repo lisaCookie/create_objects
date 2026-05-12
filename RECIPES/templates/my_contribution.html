@@ -1,119 +1,144 @@
 <!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Мой вклад</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <meta charset="UTF-8">
+  <title>Мой вклад</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/my_contribution.css') }}">
 </head>
 <body>
-
-<!-- Навигационная панель -->
-<div class="nav-bar">
+  <!-- Навигационная панель -->
+  <div class="nav-bar">
     <h3>Каталог категорий</h3>
     {% include 'navbar.html' %}
-</div>
+  </div>
 
-<!-- Сообщения -->
-{% with messages = get_flashed_messages() %}
+  <!-- Сообщения -->
+  {% with messages = get_flashed_messages() %}
     {% if messages %}
-        {% for msg in messages %}
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                {{ msg }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
+      {% for msg in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          {{ msg }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
     {% endif %}
-{% endwith %}
+  {% endwith %}
 
-<!-- Основной контент -->
-<div class="container mt-4">
+  <!-- Основной контент -->
+  <div class="container mt-4">
     <h1 class="mb-4"><i class="fas fa-user-edit me-2"></i>Мой вклад — всё, что я создал</h1>
 
     <!-- Мои категории -->
     <div class="admin-panel">
-        <h3><i class="fas fa-folder me-2"></i>Мои категории ({{ categories|length }})</h3>
+      <h3>
+        <i class="fas fa-folder me-2"></i>
+        <button class="btn btn-link p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCategories" aria-expanded="false" aria-controls="collapseCategories">
+          Мои категории ({{ categories|length }})
+          <i class="fas fa-chevron-down ms-2 text-muted"></i>
+        </button>
+      </h3>
+      <div class="collapse" id="collapseCategories">
         {% if categories %}
-            <div class="list-group">
-                {% for cat in categories %}
-                    <a href="{{ url_for('objects.category_page', category_id=cat.id) }}" class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <strong>{{ cat.name }}</strong>
-                            <small class="text-muted">{{ cat.created_at.strftime('%d.%m.%Y') }}</small>
-                        </div>
-                        <small class="text-secondary">Перейти к категории →</small>
-                    </a>
-                {% endfor %}
-            </div>
+          <div class="list-group">
+            {% for cat in categories %}
+              <a href="{{ url_for('objects.category_page', category_id=cat.id) }}" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between align-items-center">
+                  <strong>{{ cat.name }}</strong>
+                  <small class="text-muted">{{ cat.created_at | format_datetime }}</small>
+                </div>
+                <small class="text-secondary">Перейти к категории →</small>
+              </a>
+            {% endfor %}
+          </div>
         {% else %}
-            <p class="text-center text-muted py-4">Вы ещё не создали ни одной категории.</p>
+          <p class="text-center text-muted py-4">Вы ещё не создали ни одной категории.</p>
         {% endif %}
+      </div>
     </div>
 
     <!-- Мои объекты (рецепты) -->
     <div class="admin-panel mt-4">
-        <h3><i class="fas fa-utensils me-2"></i>Мои объекты (рецепты) ({{ objects|length }})</h3>
+      <h3>
+        <i class="fas fa-utensils me-2"></i>
+        <button class="btn btn-link p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseObjects" aria-expanded="false" aria-controls="collapseObjects">
+          Мои объекты (рецепты) ({{ objects|length }})
+          <i class="fas fa-chevron-down ms-2 text-muted"></i>
+        </button>
+      </h3>
+      <div class="collapse" id="collapseObjects">
         {% if objects %}
-            <div class="list-group">
-                {% for obj in objects %}
-                    <a href="{{ url_for('objects.category_page', category_id=obj.category_id) }}" class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <strong>{{ obj.name }}</strong>
-                                <p class="mb-1"><em>{{ obj.description or "Без описания" }}</em></p>
-                                <small class="text-muted">
-                                    Категория: <a href="{{ url_for('objects.category_page', category_id=obj.category_id) }}" class="text-decoration-none">{{ obj.category_name }}</a>
-                                </small>
-                                <br>
-                                <small class="text-secondary">Создан: {{ obj.created_at.strftime('%d.%m.%Y') }}</small>
-                            </div>
-                            <i class="fas fa-arrow-right text-secondary ms-3"></i>
-                        </div>
-                    </a>
-                {% endfor %}
-            </div>
+          <div class="row g-3">
+            {% for obj in objects %}
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-2">{{ obj.name }}</h5>
+                    <p class="card-text flex-grow-1"><em>{{ obj.description or "Без описания" }}</em></p>
+                    <small class="text-muted mb-2">
+                      Категория: 
+                      <a href="{{ url_for('objects.category_page', category_id=obj.category_id) }}" class="text-decoration-none text-primary">
+                        {{ obj.category_name }}
+                      </a>
+                    </small>
+                    <small class="text-secondary mb-3">Создан: {{ obj.created_at | format_datetime }}</small>
+                    <a href="{{ url_for('objects.category_page', category_id=obj.category_id) }}" class="btn btn-outline-primary btn-sm mt-auto"> Подробнее → </a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
         {% else %}
-            <p class="text-center text-muted py-4">Вы ещё не создали ни одного объекта (рецепта).</p>
+          <p class="text-center text-muted py-4">Вы ещё не создали ни одного объекта (рецепта).</p>
         {% endif %}
+      </div>
     </div>
 
     <!-- Мои комментарии -->
     <div class="admin-panel mt-4">
-        <h3><i class="fas fa-comment me-2"></i>Мои комментарии ({{ comments|length }})</h3>
+      <h3>
+        <i class="fas fa-comment me-2"></i>
+        <button class="btn btn-link p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseComments" aria-expanded="false" aria-controls="collapseComments">
+          Мои комментарии ({{ comments|length }})
+          <i class="fas fa-chevron-down ms-2 text-muted"></i>
+        </button>
+      </h3>
+      <div class="collapse" id="collapseComments">
         {% if comments %}
-            <div class="list-group">
-                {% for comment in comments %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <strong>К комментарию:</strong>
-                                <a href="{{ url_for('objects.category_page', category_id=comment.category_id) }}" class="text-decoration-none">
-                                    <strong>{{ comment.object_name }}</strong>
-                                </a>
-                                <p class="mt-2">{{ comment.text }}</p>
-                                <small class="text-secondary">Оставлен: {{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
-                            </div>
-                            <form method="POST" action="{{ url_for('delete_objects.delete_comment', comment_id=comment.id) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-outline-danger btn-sm ms-2" onclick="return confirm('Удалить этот комментарий?')">
-                                    <i class="fas fa-trash me-1"></i>Удалить
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
+          <div class="list-group">
+            {% for comment in comments %}
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <strong>К комментарию:</strong>
+                    <a href="{{ url_for('objects.category_page', category_id=comment.category_id) }}" class="text-decoration-none">
+                      <strong>{{ comment.object_name }}</strong>
+                    </a>
+                    <p class="mt-2">{{ comment.text }}</p>
+                    <small class="text-secondary">Оставлен: {{ comment.created_at | format_datetime('%d.%m.%Y %H:%M') }}</small>
+                  </div>
+                  <form method="POST" action="{{ url_for('delete_objects.delete_comment', comment_id=comment.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-outline-danger btn-sm ms-2" onclick="return confirm('Удалить этот комментарий?')">
+                      <i class="fas fa-trash me-1"></i>Удалить
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
         {% else %}
-            <p class="text-center text-muted py-4">Вы ещё не оставили ни одного комментария.</p>
+          <p class="text-center text-muted py-4">Вы ещё не оставили ни одного комментария.</p>
         {% endif %}
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Ваш скрипт -->
-<script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Ваш скрипт -->
+  <script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>
