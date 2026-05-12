@@ -1,0 +1,48 @@
+.admin-panel {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .accordion-item {
+            border: 1px solid #e0e0e0;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        .accordion-button {
+            font-weight: 600;
+            color: #333;
+            background-color: #f0f0f0;
+        }
+        .accordion-button:focus {
+            box-shadow: none;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #e9ecef;
+            color: #212529;
+        }
+        .list-group-item {
+            cursor: pointer;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 4px;
+        }
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+        .alert {
+            margin-top: 15px;
+        }
+        .btn-icon {
+            margin-right: 5px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .badge {
+            font-size: 0.85rem;
+        }
+        /* Стили для форм удаления */
+        .delete-form {
+            display: inline;
+        }

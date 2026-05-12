@@ -1,0 +1,78 @@
+/* Стили для списка и карточек */
+.admin-panel {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+}
+
+.list-group-item {
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 14px 16px;
+    transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f0f4f8;
+    border-color: #d1d9e6;
+}
+
+.list-group-item strong {
+    color: #333;
+}
+
+.list-group-item .text-secondary {
+    color: #6c757d !important;
+}
+
+.list-group-item .text-muted {
+    color: #868e96 !important;
+}
+
+/* Кнопки удаления */
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Иконки */
+i.fas {
+    color: #495057;
+}
+
+/* Заголовки */
+h3 {
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+/* Текст "нет контента" */
+.text-center.text-muted {
+    font-style: italic;
+    color: #868e96;
+}
+
+/* Улучшенная адаптивность */
+@media (max-width: 768px) {
+    .list-group-item {
+        padding: 12px 14px;
+    }
+    .list-group-item .d-flex {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .list-group-item .ms-2 {
+        margin-top: 8px;
+    }
+}

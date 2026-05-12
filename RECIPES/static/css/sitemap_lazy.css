@@ -1,0 +1,88 @@
+/* RECIPES/static/css/sitemap_lazy.css */
+
+.sitemap-container {
+  margin: 1rem 0;
+}
+
+.sitemap-node {
+  margin: 0.5rem 0;
+}
+
+.sitemap-category {
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid #0d6efd;
+  background-color: #f8f9fa;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.sitemap-category:hover {
+  background-color: #e9ecef;
+}
+
+.sitemap-category .toggle-icon {
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+  transition: transform 0.2s ease-in-out;
+}
+
+.sitemap-category.expanded .toggle-icon {
+  transform: rotate(90deg);
+}
+
+.sitemap-children {
+  margin-left: 20px;
+  margin-top: 0.3rem;
+  border-left: 1px dashed #ccc;
+  padding-left: 1rem;
+  display: none;
+}
+
+.sitemap-children.loaded {
+  display: block;
+}
+
+.sitemap-object {
+  padding: 0.4rem 0.6rem;
+  margin: 0.2rem 0;
+  background-color: #f1f3f4;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+}
+
+.sitemap-object .icon {
+  margin-right: 0.3rem;
+  color: #6c757d;
+}
+
+.loading {
+  color: #6c757d;
+  font-style: italic;
+  padding-left: 1rem;
+}
+
+.sitemap-header {
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  color: #0d6efd;
+}
+
+.sitemap-category > a {
+  flex-grow: 1;
+}

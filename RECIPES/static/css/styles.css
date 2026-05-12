@@ -1,0 +1,209 @@
+/* static/css/styles.css — Только дополняющие стили для Bootstrap 5 */
+
+/* static/css/styles.css — Только дополняющие стили для Bootstrap 5 */
+
+/* Цвета и шрифты — единая палитра */
+:root {
+  --bg-primary: #f5f0e6;
+  --bg-secondary: #e8e0d0;
+  --accent: #5a756a;
+  --accent-hover: #465d55;
+  --text: #3a3a3a;
+  --border: #d4c9b8;
+  --shadow: 0 4px 12px rgba(90, 117, 106, 0.1);
+  --font-main: 'Georgia', 'Times New Roman', serif;
+}
+
+body {
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text);
+  font-family: var(--font-main);
+  line-height: 1.7;
+  margin: 0;
+  padding: 0;
+}
+
+/* Уменьшаем отступы Bootstrap на 33% */
+.container,
+.container-fluid {
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+.card-body {
+  padding: 1rem !important;
+}
+
+.mb-3,
+.mb-4,
+.mb-5 {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Кнопки */
+.btn-primary {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  font-family: var(--font-main) !important;
+  padding: 0.4rem 0.8rem !important;
+  font-size: 0.9rem !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-outline-danger {
+  border-color: #dc3545 !important;
+  color: #dc3545 !important;
+  padding: 0.4rem 0.8rem !important;
+  font-size: 0.9rem !important;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545 !important;
+  color: white !important;
+  border-color: #dc3545 !important;
+}
+
+/* Заголовки */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: var(--accent) !important;
+  font-family: var(--font-main) !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+h1 {
+  font-size: 2rem !important;
+}
+
+h2 {
+  font-size: 1.75rem !important;
+}
+
+h3 {
+  font-size: 1.5rem !important;
+}
+
+h4 {
+  font-size: 1.3rem !important;
+}
+
+h5 {
+  font-size: 1.1rem !important;
+}
+
+/* Карточки */
+.card {
+  border-radius: 12px !important;
+  box-shadow: var(--shadow) !important;
+  border: none !important;
+}
+
+/* Формы */
+.form-label {
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  margin-bottom: 0.3rem !important;
+}
+
+.form-control {
+  border-radius: 8px !important;
+  border-color: var(--border) !important;
+  font-family: var(--font-main) !important;
+  padding: 0.4rem 0.7rem !important;
+  font-size: 0.9rem !important;
+}
+
+.form-control:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(90, 117, 106, 0.2) !important;
+}
+
+/* Ингредиенты */
+.ingredient-row {
+  display: flex !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.7rem !important;
+  align-items: center !important;
+}
+
+.ingredient-row input,
+.ingredient-row select {
+  flex: 1 !important;
+  padding: 0.3rem !important;
+  font-size: 0.85rem !important;
+}
+
+.ingredient-row .btn-outline-danger {
+  padding: 0.3rem 0.6rem !important;
+  font-size: 0.8rem !important;
+}
+
+/* Комментарии */
+.card.mb-2 {
+  border: 1px solid var(--border) !important;
+  margin-bottom: 0.7rem !important;
+}
+
+.card-body strong {
+  color: var(--accent) !important;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .container,
+  .container-fluid {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .ingredient-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .ingredient-row input,
+  .ingredient-row select,
+  .ingredient-row .btn {
+    width: 100% !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  h1 {
+    font-size: 1.8rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.3rem !important;
+  }
+
+  .btn-primary,
+  .btn-outline-danger {
+    padding: 0.5rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* На мобильных — все блоки стекаются вертикально */
+  .col-lg-4 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}

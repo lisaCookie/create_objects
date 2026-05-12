@@ -1,0 +1,53 @@
+<!-- RECIPES/templates/object_detail.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ object.name }} — Рецепт</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">← Назад</a>
+        <h1 class="mt-3">{{ object.name }}</h1>
+        <p class="text-muted">Категория: <strong>{{ object.category_name }}</strong></p>
+        <p>{{ object.description or "Описание отсутствует." }}</p>
+        <small class="text-muted">Создано: {{ object.created_at }}</small>
+
+        <h3 class="mt-4">Ингредиенты:</h3>
+        <ul class="list-group">
+            {% for ingredient in ingredients %}
+                <li class="list-group-item">
+                    {{ ingredient.name }} — {{ ingredient.amount }} {{ ingredient.unit }}
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">Ингредиенты не указаны.</li>
+            {% endfor %}
+        </ul>
+
+        <h3 class="mt-4">Комментарии:</h3>
+        {% for comment in comments %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <strong>{{ comment.username }}</strong> — {{ comment.created_at }}
+                    <p class="mt-2">{{ comment.text }}</p>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-muted">Пока нет комментариев.</p>
+        {% endfor %}
+
+        <!-- Форма добавления комментария -->
+        {% if 'user_id' in session %}
+            <h4>Добавить комментарий:</h4>
+            <form method="POST" action="{{ url_for('objects.add_comment', object_id=object.id) }}">
+                <textarea name="comment_text" class="form-control" rows="3" required placeholder="Ваш комментарий..."></textarea>
+                <button type="submit" class="btn btn-primary mt-2">Отправить</button>
+            </form>
+        {% else %}
+            <p><a href="{{ url_for('login.login') }}">Войдите</a>, чтобы оставить комментарий.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
