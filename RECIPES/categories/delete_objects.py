@@ -93,9 +93,9 @@ def delete_category(category_id):
             flash("Категория не найдена.")
             return redirect(url_for('index'))
 
-        # Проверка прав: только создатель или админ
-        if category['created_by'] != session['user_id'] and not session.get('is_admin'):
-            flash("Вы можете удалять только свои категории.")
+        # Проверка прав: только админ
+        if not session.get('is_admin'):
+            flash("Только администратор может удалять категории.")
             return redirect(url_for('index'))
 
         # Удаляем категорию — CASCADE автоматически удалит подкатегории и связанные объекты

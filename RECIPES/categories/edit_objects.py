@@ -109,28 +109,31 @@ def edit_comment(comment_id):
             flash("Комментарий не найден.")
             return redirect(url_for('index'))
 
-        # ✅ Используем универсальную функцию проверки
         if not can_edit(session['user_id'], comment['user_id'], conn):
             flash("Вы не можете редактировать чужой комментарий.")
             return redirect(url_for('objects.category_page', category_id=comment['category_id']))
 
         if request.method == 'POST':
             text = request.form.get('comment_text', '').strip()
-
             if not text:
                 flash('Комментарий не может быть пустым.')
-                return redirect(url_for('objects.edit_comment', comment_id=comment_id))
+                return redirect(url_for('edit_objects.edit_comment', comment_id=comment_id))
 
             conn.execute("""
-                UPDATE comments
-                SET text = ?
-                WHERE id = ?
+                UPDATE comments SET text = ? WHERE id = ?
             """, (text, comment_id))
-
             flash('Комментарий успешно обновлён!')
             return redirect(url_for('objects.category_page', category_id=comment['category_id']))
 
-        return render_template('edit_comment.html', comment=comment)
+        # ✅ ДЛЯ GET — ПЕРЕНАПРАВЛЯЕМ НА СТРАНИЦУ КАТЕГОРИИ С ЗАПОЛНЕННЫМ ПОЛЕМ КОММЕНТАРИЯ
+        # Это работает через флаг в сессии
+        session['editing_comment'] = {
+            'id': comment_id,
+            'text': comment['text'],
+            'object_id': comment['object_id']
+        }
+        return redirect(url_for('objects.category_page', category_id=comment['category_id']))
+
 
 
 @edit_objects_bp.route('/category/<int:category_id>/edit', methods=['POST'])

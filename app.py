@@ -1,6 +1,4 @@
-# app.py (обновлённая версия с поиском по объектам)
-
-# app.py (обновлённая версия с рекурсивным поиском по категориям и объектам)
+# app.py 
 
 from flask import Flask, render_template, session, redirect, url_for, flash, request
 from RECIPES.users.register import register_bp
