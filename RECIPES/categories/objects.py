@@ -1,4 +1,3 @@
-
 # RECIPES/categories/objects.py
 from flask import jsonify  
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
@@ -21,7 +20,7 @@ def category_page(category_id):
             flash("Category not found.")
             return redirect(url_for('index'))
         category = dict(category)
-        objects = get_objects_by_category_id(category_id)
+        objects = get_objects_by_category_id(category_id, user_id=session.get('user_id')) 
         objects_with_ingredients = []
         for obj in objects:
             obj_dict = dict(obj)
@@ -115,16 +114,17 @@ def create_subcategory(category_id):
 def object_detail(object_id):
     conn = get_db_connection()
     with conn:
-        # Получаем объект
+        # Получаем объект с учетом видимости
         obj = conn.execute("""
-            SELECT o.id, o.name, o.description, o.created_at, c.name AS category_name
+            SELECT o.id, o.name, o.description, o.created_at, c.name AS category_name, o.visible_to_guests
             FROM objects o
             JOIN categories c ON o.category_id = c.id
             WHERE o.id = ?
         """, (object_id,)).fetchone()
 
-        if not obj:
-            flash("Object not found.")
+        # Если объект не найден ИЛИ объект скрыт для гостей И пользователь не авторизован
+        if not obj or (obj['visible_to_guests'] == 0 and 'user_id' not in session):
+            flash("Объект не найден или недоступен.")
             return redirect(url_for('index'))
 
         obj = dict(obj)
@@ -171,7 +171,7 @@ def sitemap():
 def sitemap_children(category_id):
     conn = get_db_connection()
     with conn:
-        # Получаем прямые подкатегории
+        # Получаем подкатегории (всегда видны, если есть — они не зависят от visible_to_guests)
         children = conn.execute("""
             SELECT c.id, c.name, c.parent_id, u.username AS created_by_username
             FROM categories c
@@ -180,14 +180,25 @@ def sitemap_children(category_id):
             ORDER BY c.name
         """, (category_id,)).fetchall()
 
-        # Получаем объекты (рецепты) в этой категории
-        objects = conn.execute("""
-            SELECT o.id, o.name
-            FROM objects o
-            WHERE o.category_id = ?
-            ORDER BY o.name
-        """, (category_id,)).fetchall()
+        # Получаем объекты — с фильтрацией по видимости для гостей
+        if 'user_id' in session:
+            # Авторизованный пользователь: видит ВСЕ объекты в категории
+            objects = conn.execute("""
+                SELECT o.id, o.name, o.visible_to_guests
+                FROM objects o
+                WHERE o.category_id = ?
+                ORDER BY o.name
+            """, (category_id,)).fetchall()
+        else:
+            # Гость: видит ТОЛЬКО объекты, видимые для всех
+            objects = conn.execute("""
+                SELECT o.id, o.name, o.visible_to_guests
+                FROM objects o
+                WHERE o.category_id = ? AND o.visible_to_guests = 1
+                ORDER BY o.name
+            """, (category_id,)).fetchall()
 
+        # Преобразуем в списки словарей
         children = [dict(row) for row in children]
         objects = [dict(row) for row in objects]
 

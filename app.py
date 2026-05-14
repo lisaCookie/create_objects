@@ -12,6 +12,7 @@ from RECIPES.categories.edit_objects import edit_objects_bp
 from RECIPES.users.my_contribution import my_contribution_bp
 from RECIPES.admin.admin import admin_bp
 from RECIPES.categories.object_movement import object_movement_bp
+from RECIPES.categories.objects_visibility import visibility_bp
 from dotenv import load_dotenv
 import os
 import sqlite3
@@ -31,6 +32,7 @@ app.register_blueprint(delete_objects_bp, url_prefix='/')
 app.register_blueprint(my_contribution_bp, url_prefix='/')
 app.register_blueprint(admin_bp, url_prefix='/')
 app.register_blueprint(object_movement_bp, url_prefix='/')
+app.register_blueprint(visibility_bp, url_prefix='/')
 
 @app.template_global('get_categories_by_parent')
 def get_categories_by_parent_global(parent_id):

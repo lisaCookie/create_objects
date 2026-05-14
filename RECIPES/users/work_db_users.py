@@ -60,6 +60,7 @@ def init_users_table():
                     category_id INTEGER NOT NULL,
                     created_by INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    visible_to_guests INTEGER DEFAULT 1,
                     FOREIGN KEY (category_id) REFERENCES categories (id),
                     FOREIGN KEY (created_by) REFERENCES users (id)
                 )
@@ -180,17 +181,30 @@ def get_category_by_id(category_id):
 
 # --- Функции для работы с объектами (рецептами) ---
 
-def get_objects_by_category_id(category_id):
+def get_objects_by_category_id(category_id, user_id=None):
+    """
+    Возвращает объекты для указанной категории.
+    Если user_id не предоставлен (т.е. гость), возвращает только объекты, видимые гостям.
+    """
     conn = get_db_connection()
     with conn:
         cursor = conn.cursor()
-        cursor.execute("""
-            SELECT o.id, o.name, o.description, o.created_by, u.username AS created_by_username, o.created_at
+        query = """
+            SELECT o.id, o.name, o.description, o.created_by, u.username AS created_by_username, o.created_at, o.visible_to_guests
             FROM objects o
             JOIN users u ON o.created_by = u.id
             WHERE o.category_id = ?
-            ORDER BY o.created_at DESC
-        """, (category_id,))
+        """
+        params = [category_id]
+
+        # Если пользователь не авторизован (user_id is None),
+        # добавляем условие, что объект должен быть видим для гостей.
+        if user_id is None:
+            query += " AND o.visible_to_guests = 1"
+        
+        query += " ORDER BY o.created_at DESC"
+        
+        cursor.execute(query, tuple(params))
         return cursor.fetchall()
 
 def insert_object(name, description, category_id, user_id):
