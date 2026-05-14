@@ -11,7 +11,8 @@ DB_PATH = os.path.join(os.path.dirname(__file__), 'recipes.db')
 def get_db_connection():
     """Создаёт и возвращает подключение к базе данных с поддержкой именованных столбцов."""
     conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = Row  # Позволяет обращаться к столбцам по именам, например: row['username']
+    conn.row_factory = Row
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
@@ -37,19 +38,20 @@ def init_users_table():
                 )
             """)
 
-            # Таблица категорий
-            cursor.execute(""" 
+            # Таблица категорий (с глобальной уникальностью имён)
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS categories (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
-                    parent_id INTEGER,  
+                    parent_id INTEGER,
                     created_by INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (parent_id) REFERENCES categories (id) ON DELETE CASCADE,
                     FOREIGN KEY (created_by) REFERENCES users (id),
-                    UNIQUE(name, parent_id)
+                    UNIQUE(name)
                 )
             """)
+
 
             # Таблица объектов (рецептов)
             cursor.execute("""
@@ -61,8 +63,8 @@ def init_users_table():
                     created_by INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     visible_to_guests INTEGER DEFAULT 1,
-                    FOREIGN KEY (category_id) REFERENCES categories (id),
-                    FOREIGN KEY (created_by) REFERENCES users (id),
+                    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE,
+                    FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
                     UNIQUE(name, category_id)
                 )
             """)
@@ -75,7 +77,7 @@ def init_users_table():
                     name TEXT NOT NULL,
                     amount REAL NOT NULL,
                     unit TEXT NOT NULL,
-                    FOREIGN KEY (object_id) REFERENCES objects (id)
+                    FOREIGN KEY (object_id) REFERENCES objects (id) ON DELETE CASCADE
                 )
             """)
 
@@ -118,16 +120,26 @@ def init_users_table():
         conn.close()
 # --- Функции для работы с категориями ---
 
+
 def insert_category(name, user_id, parent_id=None):
-    """Создаёт категорию (корневую или подкатегорию)."""
+    """Создаёт категорию (корневую или подкатегорию). Возвращает ID или None при ошибке."""
+    if not name or not name.strip():
+        raise ValueError("Имя категории не может быть пустым")
+
     conn = get_db_connection()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO categories (name, parent_id, created_by) VALUES (?, ?, ?)",
-            (name, parent_id, user_id)
-        )
-        return cursor.lastrowid
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO categories (name, parent_id, created_by) VALUES (?, ?, ?)",
+                (name.strip(), parent_id, user_id)
+            )
+            return cursor.lastrowid
+    except sqlite3.IntegrityError:
+        raise ValueError(f"Категория с именем '{name}' уже существует")
+    except sqlite3.Error as e:
+        raise RuntimeError(f"Ошибка базы данных при создании категории: {e}")
+
 
 def get_all_categories_with_hierarchy():
     """Возвращает все категории с иерархией: родитель → подкатегории."""
