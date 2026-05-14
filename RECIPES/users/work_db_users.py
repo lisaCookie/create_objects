@@ -91,6 +91,17 @@ def init_users_table():
                 )
             """)
 
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS settings (
+                id INTEGER PRIMARY KEY CHECK (id = 1), -- только одна строка
+                auth_code TEXT,  -- кодовое слово для пользователей (не админов)
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cursor.execute("SELECT COUNT(*) FROM settings")
+            if cursor.fetchone()[0] == 0:
+                cursor.execute("INSERT INTO settings (id, auth_code) VALUES (1, NULL)")
+
             # Проверка и создание администратора 'superadmin'
             cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", ("superadmin",))
             if cursor.fetchone()[0] == 0:
@@ -263,3 +274,21 @@ def insert_comment(object_id, user_id, text):
             INSERT INTO comments (object_id, user_id, text)
             VALUES (?, ?, ?)
         """, (object_id, user_id, text))
+
+# --- Функции для работы с кодовым словом ---
+def get_auth_code():
+    """Возвращает текущее кодовое слово из settings (или None, если не задано)"""
+    conn = get_db_connection()
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT auth_code FROM settings WHERE id = 1")
+        row = cursor.fetchone()
+        return row[0] if row else None
+
+def update_settings_auth_code(new_code):
+    """Обновляет кодовое слово в settings. Может быть пустым (None)."""
+    conn = get_db_connection()
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE settings SET auth_code = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1", (new_code,))
+        return cursor.rowcount > 0

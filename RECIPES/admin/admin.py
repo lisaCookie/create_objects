@@ -1,6 +1,6 @@
 # RECIPES/admin/admin.py
 from flask import Blueprint, render_template, redirect, url_for, flash, session, request
-from RECIPES.users.work_db_users import get_db_connection
+from RECIPES.users.work_db_users import get_db_connection, get_auth_code, update_settings_auth_code
 
 admin_bp = Blueprint('admin', __name__, template_folder='../templates', static_folder='../static')
 
@@ -132,7 +132,8 @@ def dashboard():
                                # Передаем текущие значения фильтров для их сохранения в выпадающих списках
                                current_creator_id=creator_id_filter,
                                current_category_id=category_id_filter,
-                               current_object_id=object_id_filter)
+                               current_object_id=object_id_filter,
+                               current_auth_code=get_auth_code())
 
 # --- Маршруты удаления с исправленными редиректами ---
 
@@ -235,3 +236,26 @@ def delete_comment_admin(comment_id):
         flash('Комментарий удалён админом.')
         # Исправленный редирект: остаемся в админке
         return redirect(url_for('admin.dashboard'))
+    
+@admin_bp.route('/update_auth_code', methods=['POST'])
+def update_auth_code():
+    if 'user_id' not in session:
+        flash('Вы должны быть авторизованы.')
+        return redirect(url_for('login.login'))
+
+    conn = get_db_connection()
+    with conn:
+        user_session = conn.execute("SELECT is_admin FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+        if not user_session or not user_session['is_admin']:
+            flash('У вас нет прав администратора.')
+            return redirect(url_for('index'))
+
+    # Получаем код из формы
+    new_code = request.form.get('auth_code', '').strip() or None  # Если пусто → None
+
+    if update_settings_auth_code(new_code):
+        flash('Код авторизации обновлён!')
+    else:
+        flash('Ошибка при обновлении кода.')
+
+    return redirect(url_for('admin.dashboard'))
