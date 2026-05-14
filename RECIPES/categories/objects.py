@@ -1,5 +1,6 @@
 # RECIPES/categories/objects.py
-from flask import jsonify  
+from flask import jsonify
+import sqlite3
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from RECIPES.users.work_db_users import get_db_connection, get_all_categories_with_hierarchy, get_objects_by_category_id, get_ingredients_by_object_id, insert_category, get_comments_by_object_id, insert_object, insert_ingredient, insert_comment
 
@@ -47,14 +48,19 @@ def create_object(category_id):
         flash('Object name cannot be empty.')
         return redirect(url_for('objects.category_page', category_id=category_id))
 
-    # Insert object
-    object_id = insert_object(name, description, category_id, session['user_id'])
+    try:
+        object_id = insert_object(name, description, category_id, session['user_id'])
+    except sqlite3.IntegrityError:
+        flash('Имя уже занято.')  # ← Ваше сообщение на русском
+        return redirect(url_for('objects.category_page', category_id=category_id))
+    except Exception as e:
+        flash(f'Ошибка при создании объекта: {str(e)}')
+        return redirect(url_for('objects.category_page', category_id=category_id))
 
-    # Process ingredients
+    # Обработка ингредиентов
     ingredient_names = request.form.getlist('ingredient_name[]')
     ingredient_amounts = request.form.getlist('ingredient_amount[]')
-
-    ingredient_units = request.form.getlist('ingredient_unit[]') #new
+    ingredient_units = request.form.getlist('ingredient_unit[]')
 
     for i in range(len(ingredient_names)):
         name = ingredient_names[i].strip()
@@ -63,8 +69,9 @@ def create_object(category_id):
         if name and amount and amount.isdigit() and int(amount) >= 0:
             insert_ingredient(object_id, name, int(amount), unit)
 
-    flash('Object created successfully!')
+    flash('Объект создан успешно!')
     return redirect(url_for('objects.category_page', category_id=category_id))
+
 
 
 @objects_bp.route('/object/<int:object_id>/add_comment', methods=['POST'])
@@ -104,9 +111,14 @@ def create_subcategory(category_id):
         flash('Название категории не может быть пустым.')
         return redirect(url_for('objects.category_page', category_id=category_id))
 
-    # Создаём подкатегорию в указанной категории
-    subcategory_id = insert_category(name, session['user_id'], parent_id=category_id)
-    flash(f'Подкатегория "{name}" создана!')
+    try:
+        subcategory_id = insert_category(name, session['user_id'], parent_id=category_id)
+        flash(f'Подкатегория "{name}" создана!')
+    except sqlite3.IntegrityError:
+        flash(f'Подкатегория с таким именем уже существует в этой категории.')
+    except Exception as e:
+        flash(f'Ошибка при создании подкатегории: {str(e)}')
+
     return redirect(url_for('objects.category_page', category_id=category_id))
 
 

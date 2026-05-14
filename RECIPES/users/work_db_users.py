@@ -62,7 +62,8 @@ def init_users_table():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     visible_to_guests INTEGER DEFAULT 1,
                     FOREIGN KEY (category_id) REFERENCES categories (id),
-                    FOREIGN KEY (created_by) REFERENCES users (id)
+                    FOREIGN KEY (created_by) REFERENCES users (id),
+                    UNIQUE(name, category_id)
                 )
             """)
 
