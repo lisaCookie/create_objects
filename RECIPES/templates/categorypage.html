@@ -16,7 +16,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, msg in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show mx-3 mb-3" role="alert">
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show mx-3 mb-3" role="role">
                     {{ msg }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -32,9 +32,6 @@
                 <a href="{{ url_for('objects.category_page', category_id=current_cat.parent_id) }}" class="text-decoration-none text-muted me-2"> ← {{ get_category_by_id(current_cat.parent_id).name }} </a>
             {% endif %}
             <h1 class="mb-0">{{ category.name }}</h1>
-            {% if session.get('user_id') and session.user_id == category.created_by %}
-                {# Удалена кнопка удаления категории #}
-            {% endif %}
         </div>
     </div>
 
@@ -42,7 +39,7 @@
     <div class="container-fluid">
         <div class="row g-3">
 
-            <!-- ЛЕВАЯ КОЛОНКА: Подкатегории -->
+            <!-- Левая колонка: Подкатегории -->
             <div class="col-12 col-lg-4">
                 {% if session.get('user_id') %}
                     <div class="card shadow-sm mb-4">
@@ -57,7 +54,6 @@
                         </div>
                     </div>
                 {% endif %}
-
                 {% set subcategories = get_categories_by_parent(category['id']) %}
                 {% if subcategories %}
                     <h2 class="mb-3">Подкатегории</h2>
@@ -65,9 +61,7 @@
                         <div class="card shadow-sm mb-3">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">
-                                    <a href="{{ url_for('objects.category_page', category_id=subcat.id) }}" class="text-decoration-none text-primary">
-                                        {{ subcat.name }}
-                                    </a>
+                                    <a href="{{ url_for('objects.category_page', category_id=subcat.id) }}" class="text-decoration-none text-primary">{{ subcat.name }}</a>
                                 </h5>
                                 <p class="card-text text-muted small mt-2">
                                     {% if subcat.created_by_username %}Создано: {{ subcat.created_by_username }}{% endif %}
@@ -83,7 +77,7 @@
                 {% endif %}
             </div>
 
-            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: Форма создания объекта -->
+            <!-- Центр: Создание объекта -->
             <div class="col-12 col-lg-4">
                 {% if session.get('user_id') %}
                     <div class="card shadow-sm mb-4">
@@ -140,7 +134,13 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm mb-3">+ Добавить</button>
+                            <button type="button" class="btn btn-secondary btn-sm mb-3" id="add-ingredient-btn">+ Добавить</button>
+
+                            <!-- Поле "Технология" -->
+                            <div class="mb-3">
+                                <label class="form-label">Технология</label>
+                                <textarea name="object_technology" class="form-control" rows="3" placeholder="Опишите технологию приготовления (например: запекание, ферментация, варка на пару...)">{{ object_to_edit.technology if editing else '' }}</textarea>
+                            </div>
 
                             {% if editing %}
                                 <button type="submit" class="btn btn-primary w-100">💾 Сохранить изменения</button>
@@ -153,7 +153,7 @@
             {% endif %}
         </div>
 
-        <!-- ПРАВАЯ КОЛОНКА: Список объектов -->
+        <!-- Правая колонка: Объекты -->
         <div class="col-12 col-lg-4">
             <h2 class="mb-3">Объекты</h2>
             {% if objects_with_ingredients %}
@@ -185,16 +185,23 @@
                                     <small class="text-muted">Ингредиенты:</small>
                                     <ul class="list-unstyled">
                                         {% for ing in item.ingredients %}
-                                            <li>{{ ing.name }} — {{ ing.amount }} {{ ing.unit }}</li>
+                                            <li>{{ing.name}} — {{ing.amount}} {{ing.unit}}</li>
                                         {% endfor %}
                                     </ul>
                                 </div>
                             {% endif %}
 
-                            <!-- ====== БЛОК КОММЕНТАРИЕВ ====== -->
+                            <!-- Поле "Технология" -->
+                            {% if item.object.technology %}
+                            <div class="mt-2">
+                                <small class="text-muted">Технология приготовления:</small>
+                                <p class="card-text small">{{ item.object.technology }}</p>
+                            </div>
+                            {% endif %}
+
+                            <!-- Блок комментариев -->
                             <div class="mt-4 pt-3 border-top">
                                 <h6 class="mb-3">Комментарии ({{ item.comments|length }})</h6>
-
                                 {% if item.comments %}
                                     {% for comment in item.comments %}
                                         <div class="comment-card mb-3 p-3 bg-light rounded">
@@ -205,7 +212,6 @@
                                                     <form method="POST" action="{{ url_for('delete_objects.delete_comment', comment_id=comment.id) }}" class="d-inline">
                                                         <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Удалить ваш комментарий?')">🗑️ Удалить</button>
                                                     </form>
-                                                    <!-- ✅ КНОПКА РЕДАКТИРОВАНИЯ — ПЕРЕНАПРАВЛЯЕТ НА СТРАНИЦУ С ЗАПОЛНЕННОЙ ФОРМОЙ -->
                                                     <form method="POST" action="{{ url_for('edit_objects.edit_comment', comment_id=comment.id) }}" class="d-inline">
                                                         <button type="submit" class="btn btn-outline-primary btn-sm">✏️ Редактировать</button>
                                                     </form>
@@ -216,30 +222,25 @@
                                 {% else %}
                                     <p class="text-muted mb-3">Пока нет комментариев.</p>
                                 {% endif %}
-
-                                <!-- ====== ФОРМА ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ КОММЕНТАРИЯ ====== -->
+                                <!-- Форма комментариев -->
                                 {% if session.get('user_id') %}
                                     {% if session.editing_comment and session.editing_comment.object_id == item.object.id %}
                                         <form method="POST" action="{{ url_for('edit_objects.edit_comment', comment_id=session.editing_comment.id) }}" class="mt-3">
-                                            <textarea name="comment_text" class="form-control" placeholder="Редактируйте комментарий..." rows="2" required>{{ session.editing_comment.text }}</textarea>
+                                            <textarea name="comment_text" class="form-control" rows="2" required>{{ session.editing_comment.text }}</textarea>
                                             <button type="submit" class="btn btn-primary mt-2">💾 Сохранить изменения</button>
                                             <a href="{{ url_for('objects.category_page', category_id=category.id) }}" class="btn btn-outline-secondary mt-2">Отмена</a>
                                         </form>
                                         {% with %}{% set _ = session.pop('editing_comment', None) %}{% endwith %}
                                     {% else %}
                                         <form method="POST" action="{{ url_for('objects.add_comment', object_id=item.object.id) }}" class="mt-3">
-                                            <textarea name="comment_text" class="form-control" placeholder="Напишите комментарий..." rows="2" required></textarea>
+                                            <textarea name="comment_text" class="form-control" rows="2" placeholder="Напишите комментарий..." required></textarea>
                                             <button type="submit" class="btn btn-primary mt-2">Добавить комментарий</button>
                                         </form>
                                     {% endif %}
                                 {% else %}
-                                    <p class="text-muted mt-3">
-                                        <small><a href="{{ url_for('login.login') }}">Войдите</a>, чтобы оставить комментарий.</small>
-                                    </p>
+                                    <p class="text-muted mt-3"><small><a href="{{ url_for('login.login') }}">Войдите</a>, чтобы оставить комментарий.</small></p>
                                 {% endif %}
-                                <!-- ====== КОНЕЦ ФОРМЫ ====== -->
                             </div>
-                            <!-- ====== КОНЕЦ БЛОКА КОММЕНТАРИЕВ ====== -->
                         </div>
                     </div>
                 {% endfor %}

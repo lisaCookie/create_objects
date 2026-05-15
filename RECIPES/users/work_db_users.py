@@ -48,7 +48,7 @@ def init_users_table():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (parent_id) REFERENCES categories (id) ON DELETE CASCADE,
                     FOREIGN KEY (created_by) REFERENCES users (id),
-                    UNIQUE(name)
+                    UNIQUE(name, parent_id)
                 )
             """)
 
@@ -59,13 +59,14 @@ def init_users_table():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     description TEXT,
+                    technology TEXT,
                     category_id INTEGER NOT NULL,
                     created_by INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     visible_to_guests INTEGER DEFAULT 1,
                     FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE,
                     FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
-                    UNIQUE(name, category_id)
+                    UNIQUE(name)
                 )
             """)
 
@@ -214,7 +215,7 @@ def get_objects_by_category_id(category_id, user_id=None):
     with conn:
         cursor = conn.cursor()
         query = """
-            SELECT o.id, o.name, o.description, o.created_by, u.username AS created_by_username, o.created_at, o.visible_to_guests
+            SELECT o.id, o.name, o.description, o.technology, o.created_by, u.username AS created_by_username, o.created_at, o.visible_to_guests
             FROM objects o
             JOIN users u ON o.created_by = u.id
             WHERE o.category_id = ?
@@ -231,14 +232,14 @@ def get_objects_by_category_id(category_id, user_id=None):
         cursor.execute(query, tuple(params))
         return cursor.fetchall()
 
-def insert_object(name, description, category_id, user_id):
+def insert_object(name, description, category_id, user_id, technology=None):
     conn = get_db_connection()
     with conn:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO objects (name, description, category_id, created_by)
-            VALUES (?, ?, ?, ?)
-        """, (name, description, category_id, user_id))
+            INSERT INTO objects (name, description, technology, category_id, created_by)
+            VALUES (?, ?, ?, ?, ?)
+        """, (name, description, technology, category_id, user_id))
         return cursor.lastrowid
 
 # --- Функции для работы с ингредиентами ---

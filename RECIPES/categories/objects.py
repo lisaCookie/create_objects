@@ -43,13 +43,15 @@ def create_object(category_id):
 
     name = request.form.get('object_name', '').strip()
     description = request.form.get('object_description', '').strip()
+    technology = request.form.get('object_technology', '').strip()
+
 
     if not name:
         flash('Object name cannot be empty.')
         return redirect(url_for('objects.category_page', category_id=category_id))
 
     try:
-        object_id = insert_object(name, description, category_id, session['user_id'])
+        object_id = insert_object(name, description, category_id, session['user_id'], technology)
     except sqlite3.IntegrityError:
         flash('Имя уже занято.')  # ← Ваше сообщение на русском
         return redirect(url_for('objects.category_page', category_id=category_id))
@@ -128,7 +130,7 @@ def object_detail(object_id):
     with conn:
         # Получаем объект с учетом видимости
         obj = conn.execute("""
-            SELECT o.id, o.name, o.description, o.created_at, c.name AS category_name, o.visible_to_guests
+            SELECT o.id, o.name, o.description, o.technology, o.created_at, c.name AS category_name, o.visible_to_guests
             FROM objects o
             JOIN categories c ON o.category_id = c.id
             WHERE o.id = ?

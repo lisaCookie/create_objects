@@ -30,7 +30,7 @@ def edit_object(object_id):
     conn = get_db_connection()
     with conn:
         obj = conn.execute("""
-            SELECT o.id, o.name, o.description, o.category_id, o.created_by
+            SELECT o.id, o.name, o.description, o.category_id, o.created_by, o.technology 
             FROM objects o
             WHERE o.id = ?
         """, (object_id,)).fetchone()
@@ -51,6 +51,7 @@ def edit_object(object_id):
         if request.method == 'POST':
             name = request.form.get('object_name', '').strip()
             description = request.form.get('object_description', '').strip()
+            technology = request.form.get('object_technology', '').strip()
 
             if not name:
                 flash('Название объекта не может быть пустым.')
@@ -58,8 +59,8 @@ def edit_object(object_id):
 
             # ✅ Обновляем основные поля объекта
             conn.execute("""
-                UPDATE objects SET name = ?, description = ? WHERE id = ?
-            """, (name, description, object_id))
+                UPDATE objects SET name = ?, description = ?, technology = ? WHERE id = ?
+            """, (name, description, technology, object_id))
 
             # ✅ Удаляем старые ингредиенты
             conn.execute("DELETE FROM ingredients WHERE object_id = ?", (object_id,))
