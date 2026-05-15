@@ -67,9 +67,9 @@
                                     {% if subcat.created_by_username %}Создано: {{ subcat.created_by_username }}{% endif %}
                                 </p>
                                 {% if session.get('user_id') and session.user_id == subcat.created_by %}
-                                    <form method="POST" action="{{ url_for('delete_objects.delete_category', category_id=subcat.id) }}" class="mt-3">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Удалить подкатегорию {{ subcat.name }} и всё её содержимое?')"> 🗑️ Удалить </button>
-                                    </form>
+                                    <a href="{{ url_for('objects.category_detail', category_id=subcat.id) }}" class="btn btn-sm btn-warning">
+                                        Редактировать название категории
+                                    </a>
                                 {% endif %}
                             </div>
                         </div>

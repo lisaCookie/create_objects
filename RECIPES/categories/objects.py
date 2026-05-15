@@ -128,28 +128,24 @@ def create_subcategory(category_id):
 def object_detail(object_id):
     conn = get_db_connection()
     with conn:
-        # Получаем объект с учетом видимости
         obj = conn.execute("""
-            SELECT o.id, o.name, o.description, o.technology, o.created_at, c.name AS category_name, o.visible_to_guests
+            SELECT o.id, o.name, o.description, o.technology, o.created_at, c.name AS category_name, o.visible_to_guests, o.category_id
             FROM objects o
             JOIN categories c ON o.category_id = c.id
             WHERE o.id = ?
         """, (object_id,)).fetchone()
 
-        # Если объект не найден ИЛИ объект скрыт для гостей И пользователь не авторизован
         if not obj or (obj['visible_to_guests'] == 0 and 'user_id' not in session):
             flash("Объект не найден или недоступен.")
             return redirect(url_for('index'))
 
         obj = dict(obj)
 
-        # Получаем ингредиенты
         ingredients = conn.execute("""
             SELECT name, amount, unit FROM ingredients WHERE object_id = ?
         """, (object_id,)).fetchall()
         ingredients = [dict(row) for row in ingredients]
 
-        # Получаем комментарии с именами пользователей
         comments = conn.execute("""
             SELECT co.text, co.created_at, u.username
             FROM comments co
@@ -159,7 +155,7 @@ def object_detail(object_id):
         """, (object_id,)).fetchall()
         comments = [dict(row) for row in comments]
 
-        return render_template('object_detail.html', object=obj, ingredients=ingredients, comments=comments)
+        return render_template('object_detail.html', object=obj, ingredients=ingredients, comments=comments, category_id=obj['category_id'])
     
 
 @objects_bp.route('/sitemap')

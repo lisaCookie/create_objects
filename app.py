@@ -137,6 +137,10 @@ def format_datetime(value, fmt='%d.%m.%Y'):
         return value.strftime(fmt)
     return ''
 
+@app.route('/sitemap', endpoint='sitemap_lazy')
+def sitemap():
+    return render_template('sitemap_lazy.html')
+
 if __name__ == "__main__":
     from RECIPES.users.work_db_users import init_users_table
     init_users_table()
