@@ -1,11 +1,10 @@
-# app.py 
+# app.py
 
 from flask import Flask, render_template, session, redirect, url_for, flash, request
 from RECIPES.users.register import register_bp
 from RECIPES.users.login import login_bp
-from RECIPES.users.register import RegistrationForm
-from RECIPES.users.login import LoginForm
-from RECIPES.users.work_db_users import get_db_connection, get_categories_by_parent, get_category_by_id, get_all_categories_with_hierarchy, init_users_table
+from RECIPES.database.db_init import get_db_connection
+from RECIPES.categories.services.obj_category_service import get_categories_by_parent, get_category_by_id, get_all_categories_with_hierarchy
 from RECIPES.categories.objects import objects_bp
 from RECIPES.categories.delete_objects import delete_objects_bp
 from RECIPES.categories.edit_objects import edit_objects_bp
@@ -13,6 +12,7 @@ from RECIPES.users.my_contribution import my_contribution_bp
 from RECIPES.admin.admin import admin_bp
 from RECIPES.categories.object_movement import object_movement_bp
 from RECIPES.categories.objects_visibility import visibility_bp
+from RECIPES.utils.filters import filter_categories_by_search, search_objects_in_db  # <-- НОВЫЙ ИМПОРТ
 from dotenv import load_dotenv
 import os
 import sqlite3
@@ -34,6 +34,7 @@ app.register_blueprint(admin_bp, url_prefix='/')
 app.register_blueprint(object_movement_bp, url_prefix='/')
 app.register_blueprint(visibility_bp, url_prefix='/')
 
+# Глобальные шаблонные функции
 @app.template_global('get_categories_by_parent')
 def get_categories_by_parent_global(parent_id):
     return get_categories_by_parent(parent_id)
@@ -42,7 +43,7 @@ def get_categories_by_parent_global(parent_id):
 def get_category_by_id_global(category_id):
     return get_category_by_id(category_id)
 
-# Главная страница — startpage.html
+# Главная страница
 @app.route("/", methods=['GET'])
 def index():
     conn = get_db_connection()
@@ -52,50 +53,11 @@ def index():
 
         # --- Поиск по категориям ---
         search_category = request.args.get('search_category', '').strip().lower()
-        filtered_categories = []
-
-        if search_category:
-            # Рекурсивная функция для фильтрации дерева категорий
-            def filter_category_tree(categories):
-                result = []
-                for cat in categories:
-                    # Проверяем, подходит ли текущая категория
-                    matches = search_category in cat['name'].lower()
-                    # Рекурсивно фильтруем дочерние категории
-                    children = filter_category_tree(cat.get('children', []))
-                    # Если категория подходит ИЛИ у неё есть подходящие потомки — сохраняем
-                    if matches or children:
-                        cat_copy = cat.copy()
-                        cat_copy['children'] = children
-                        result.append(cat_copy)
-                return result
-
-            filtered_categories = filter_category_tree(all_categories)
-        else:
-            filtered_categories = all_categories
+        filtered_categories = filter_categories_by_search(all_categories, search_category)
 
         # --- Поиск по объектам ---
         search_object = request.args.get('search_object', '').strip()
-        search_results_objects = []
-
-        if search_object:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT o.id, o.name, o.created_at, c.name AS category_name
-                FROM objects o
-                JOIN categories c ON o.category_id = c.id
-                WHERE o.name LIKE ?
-                ORDER BY o.created_at DESC
-            """, ('%' + search_object + '%',))
-            search_results_objects = [
-                {
-                    'id': row[0],
-                    'name': row[1],
-                    'created_at': row[2],
-                    'category_name': row[3]
-                }
-                for row in cursor.fetchall()
-            ]
+        search_results_objects = search_objects_in_db(conn, search_object)
 
         return render_template(
             "startpage.html",
@@ -124,7 +86,8 @@ def create_category():
         except sqlite3.IntegrityError:
             flash(f'Category "{category_name}" already exists.')
         return redirect(url_for('index'))
-    
+
+# Фильтр для даты
 @app.template_filter('format_datetime')
 def format_datetime(value, fmt='%d.%m.%Y'):
     if isinstance(value, str):
@@ -137,11 +100,12 @@ def format_datetime(value, fmt='%d.%m.%Y'):
         return value.strftime(fmt)
     return ''
 
+# Sitemap
 @app.route('/sitemap', endpoint='sitemap_lazy')
 def sitemap():
     return render_template('sitemap_lazy.html')
 
 if __name__ == "__main__":
-    from RECIPES.users.work_db_users import init_users_table
+    from RECIPES.database.db_init import init_users_table
     init_users_table()
     app.run(host="0.0.0.0", port=5000)

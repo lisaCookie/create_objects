@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
-from .work_db_users import get_db_connection
+from RECIPES.database.db_init import get_db_connection
 
 register_bp = Blueprint('register', __name__, template_folder='../templates', static_folder='../static')
 

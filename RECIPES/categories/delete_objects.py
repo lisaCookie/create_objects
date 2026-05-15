@@ -1,6 +1,6 @@
 # RECIPES/categories/delete_objects.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from RECIPES.users.work_db_users import get_db_connection, get_objects_by_category_id, get_ingredients_by_object_id, get_comments_by_object_id, insert_object, insert_ingredient, insert_comment
+from flask import Blueprint, redirect, url_for, flash, session
+from RECIPES.database.db_init import get_db_connection
 
 delete_objects_bp = Blueprint('delete_objects', __name__)
 

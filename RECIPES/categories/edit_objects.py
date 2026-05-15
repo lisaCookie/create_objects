@@ -1,7 +1,7 @@
 # RECIPES/categories/edit_objects.py
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from RECIPES.users.work_db_users import get_db_connection
+from RECIPES.database.db_init import get_db_connection
 
 edit_objects_bp = Blueprint('edit_objects', __name__)
 
