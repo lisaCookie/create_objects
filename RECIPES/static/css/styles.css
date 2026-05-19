@@ -205,3 +205,25 @@ h5 {
     flex: 0 0 100% !important;
   }
 }
+
+
+/* Стили для страницы без боковых колонок */
+.container-fluid.no-sidebar .row {
+  justify-content: center; /* Центрирование контента по горизонтали */
+}
+
+.container-fluid.no-sidebar .col-12 {
+  max-width: 1000px; /* Максимальная ширина контента */
+  padding: 0 15px;
+}
+
+/* Убедитесь, что объекты не прижимаются к краям */
+.container-fluid.no-sidebar .col-12 {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .container-fluid.no-sidebar .col-12 {
+    width: 100%; /* Для десктопной версии незалогиненным пользователям */
+  }
+}

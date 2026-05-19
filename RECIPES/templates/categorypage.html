@@ -32,21 +32,24 @@
     </div>
   </div>
 
-  <div class="container-fluid">
+  <!-- Контейнер для объектов -->
+  <div class="container-fluid {% if not session.get('user_id') %}no-sidebar{% endif %}">
     <div class="row g-3">
 
-      <!-- Левая колонка -->
-      <div class="col-12 col-lg-4">
-        {% include 'partials/subcategories.html' %}
-      </div>
+      <!-- Левая колонка (видна только авторизованным пользователям) -->
+      {% if session.get('user_id') %}
+        <div class="col-12 col-lg-4">
+          {% include 'partials/subcategories.html' %}
+        </div>
 
-      <!-- Центральная колонка -->
-      <div class="col-12 col-lg-4">
-        {% include 'partials/object_form.html' %}
-      </div>
+        <!-- Центральная колонка (видна только авторизованным пользователям) -->
+        <div class="col-12 col-lg-4">
+          {% include 'partials/object_form.html' %}
+        </div>
+      {% endif %}
 
-      <!-- Правая колонка -->
-      <div class="col-12 col-lg-4">
+      <!-- Правая колонка с объектами видна всегда, но для неавторизованных юзеров занимает всю ширину -->
+      <div class="col-12 {% if session.get('user_id') %}col-lg-4{% endif %}">
         {% include 'partials/objects_list.html' %}
       </div>
 
