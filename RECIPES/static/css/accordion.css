@@ -1,0 +1,52 @@
+/* Аккордеон для карточек объектов */
+.card.accordion-item {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 1rem;
+}
+
+.card.accordion-item .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  position: relative;
+}
+
+.card.accordion-item .card-header:hover {
+  background-color: #e9ecef;
+}
+
+.card.accordion-item .card-header .card-title {
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
+.card.accordion-item .card-header .expand-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.card.accordion-item.active .card-header .expand-icon {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.card.accordion-item .card-body {
+  border-top: none;
+  padding: 0;
+  background-color: white;
+}
+
+.card.accordion-item .card-body .accordion-content {
+  padding: 1rem;
+  border-top: none;
+}
+
+.card.accordion-item .card-body .accordion-content .card-text {
+  margin-bottom: 1rem;
+}

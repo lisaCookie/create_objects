@@ -41,11 +41,3 @@
 
     observer.observe(document.getElementById('ingredients-container'), { childList: true, subtree: true });
   });
-
-  // Разворачивание карточек объектов по клику
-document.addEventListener('click', function(e) {
-  const card = e.target.closest('.object-card');
-  if (card) {
-    card.classList.toggle('expanded');
-  }
-});
