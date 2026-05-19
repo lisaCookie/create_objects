@@ -36,19 +36,19 @@
   <div class="container-fluid {% if not session.get('user_id') %}no-sidebar{% endif %}">
     <div class="row g-3">
 
-      <!-- Левая колонка (видна только авторизованным пользователям) -->
-      {% if session.get('user_id') %}
-        <div class="col-12 col-lg-4">
-          {% include 'partials/subcategories.html' %}
-        </div>
+      <!-- Левая колонка (подкатегории теперь видны всегда) -->
+      <div class="col-12 col-lg-4">
+        {% include 'partials/subcategories.html' %}
+      </div>
 
-        <!-- Центральная колонка (видна только авторизованным пользователям) -->
+      {% if session.get('user_id') %}
+        <!-- Центральная колонка (только для авторизованных) -->
         <div class="col-12 col-lg-4">
           {% include 'partials/object_form.html' %}
         </div>
       {% endif %}
 
-      <!-- Правая колонка с объектами видна всегда, но для неавторизованных юзеров занимает всю ширину -->
+      <!-- Правая колонка с объектами -->
       <div class="col-12 {% if session.get('user_id') %}col-lg-4{% endif %}">
         {% include 'partials/objects_list.html' %}
       </div>
