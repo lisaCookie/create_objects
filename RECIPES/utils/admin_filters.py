@@ -1,5 +1,5 @@
 # RECIPES/utils/admin_filters.py
-from typing import List, Dict, Any, Optional, Union
+from typing import Optional
 
 
 def build_users_filter_sql(creator_id: Optional[str] = None) -> tuple[str, list]:

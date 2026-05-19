@@ -1,0 +1,44 @@
+<!-- templates/partials/object_card.html -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5 class="card-title">{{ item.object.name }}</h5>
+    <p class="card-text text-muted small"><em>{{ item.object.description or "Без описания" }}</em></p>
+    <p class="text-small text-muted">Создано: {{ item.object.created_at }} — {{ item.object.created_by_username }}</p>
+
+    {% if session.get('user_id') and session.user_id == item.object.created_by %}
+      <div class="d-flex gap-1 mb-2">
+        <form method="POST" action="{{ url_for('delete_objects.delete_object', object_id=item.object.id) }}" class="d-inline">
+          <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this object?')">🗑️ Удалить</button>
+        </form>
+        <a href="{{ url_for('edit_objects.edit_object', object_id=item.object.id) }}" class="btn btn-outline-primary btn-sm d-inline">✏️ Редактировать</a>
+        <form method="POST" action="{{ url_for('visibility.toggle_visibility', object_id=item.object.id) }}" class="d-inline">
+          {% if item.object.visible_to_guests %}
+            <button type="submit" class="btn btn-sm btn-warning">Скрыть от гостей</button>
+          {% else %}
+            <button type="submit" class="btn btn-sm btn-secondary">Показать гостям</button>
+          {% endif %}
+        </form>
+      </div>
+    {% endif %}
+
+    {% if item.ingredients %}
+      <div class="mt-2">
+        <small class="text-muted">Ингредиенты:</small>
+        <ul class="list-unstyled">
+          {% for ing in item.ingredients %}
+            <li>{{ ing.name }} — {{ ing.amount }} {{ ing.unit }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if item.object.technology %}
+      <div class="mt-2">
+        <small class="text-muted">Технология приготовления:</small>
+        <p class="card-text small">{{ item.object.technology }}</p>
+      </div>
+    {% endif %}
+
+    {% include 'partials/comments_section.html' with context %}
+  </div>
+</div>

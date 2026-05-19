@@ -1,0 +1,12 @@
+<!-- templates/partials/objects_list.html -->
+<h2 class="mb-3">Объекты</h2>
+
+{% if objects_with_ingredients %}
+  {% for item in objects_with_ingredients %}
+    {% include 'partials/object_card.html' %}
+  {% endfor %}
+{% else %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-body text-center text-muted">Нет объектов в этой категории.</div>
+  </div>
+{% endif %}

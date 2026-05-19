@@ -1,5 +1,4 @@
 # RECIPES/users/db_settings.py
-import sqlite3
 from RECIPES.database.db_init import get_db_connection
 
 def get_auth_code():

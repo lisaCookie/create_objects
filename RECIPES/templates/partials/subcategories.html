@@ -1,0 +1,34 @@
+<!-- templates/partials/subcategories.html -->
+{% if session.get('user_id') %}
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h3 class="card-title">Создать подкатегорию</h3>
+    <form method="POST" action="{{ url_for('objects.create_subcategory', category_id=category.id) }}">
+      <div class="input-group">
+        <input type="text" name="category_name" class="form-control" placeholder="Название подкатегории" required />
+        <button class="btn btn-primary" type="submit">Создать</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% set subcategories = get_categories_by_parent(category['id']) %}
+{% if subcategories %}
+  <h2 class="mb-3">Подкатегории</h2>
+  {% for subcat in subcategories %}
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title text-primary">
+          <a href="{{ url_for('objects.category_page', category_id=subcat.id) }}" class="text-decoration-none text-primary">{{ subcat.name }}</a>
+        </h5>
+        <p class="card-text text-muted small mt-2">
+          {% if subcat.created_by_username %}Создано: {{ subcat.created_by_username }}{% endif %}
+        </p>
+        {% if session.get('user_id') and session.user_id == subcat.created_by %}
+          <a href="{{ url_for('objects.category_detail', category_id=subcat.id) }}" class="btn btn-sm btn-warning">Редактировать название категории</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}

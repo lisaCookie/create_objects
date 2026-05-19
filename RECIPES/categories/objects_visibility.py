@@ -1,5 +1,5 @@
 # RECIPES/objects_visibility.py
-from flask import Blueprint, jsonify, request, session, redirect, url_for, flash
+from flask import Blueprint, request, session, redirect, url_for, flash
 from RECIPES.database.db_init import get_db_connection
 
 visibility_bp = Blueprint('visibility', __name__)

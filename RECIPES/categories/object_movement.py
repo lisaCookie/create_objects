@@ -1,6 +1,6 @@
 # RECIPES/admin/object_movement.py
 
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, render_template
 from RECIPES.database.db_init import get_db_connection
 
 object_movement_bp = Blueprint('object_movement', __name__)

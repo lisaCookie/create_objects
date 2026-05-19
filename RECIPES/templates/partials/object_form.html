@@ -1,0 +1,66 @@
+<!-- templates/partials/object_form.html -->
+{% if session.get('user_id') %}
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    {% if editing %}
+      <h3 class="card-title">✏️ Редактировать объект</h3>
+      <form method="POST" action="{{ url_for('edit_objects.edit_object', object_id=object_to_edit.id) }}">
+    {% else %}
+      <h3 class="card-title">Создать объект</h3>
+      <form method="POST" action="{{ url_for('objects.create_object', category_id=category.id) }}">
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label">Название</label>
+      <input type="text" name="object_name" class="form-control" value="{{ object_to_edit.name if editing else '' }}" placeholder="Название объекта" required />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Описание</label>
+      <textarea name="object_description" class="form-control" rows="2" placeholder="Описание объекта">{{ object_to_edit.description if editing else '' }}</textarea>
+    </div>
+
+    <h5 class="mb-2">Ингредиенты</h5>
+    <div id="ingredients-container">
+      {% if editing and ingredients %}
+        {% for ing in ingredients %}
+          <div class="ingredient-row mb-3 d-flex gap-2">
+            <input type="text" name="ingredient_name[]" class="form-control" value="{{ ing.name }}" required />
+            <input type="number" name="ingredient_amount[]" class="form-control" value="{{ ing.amount }}" min="0" required style="width: 80px;" />
+            <select name="ingredient_unit[]" class="form-select" required style="width: 60px;">
+              <option value="ml" {% if ing.unit == 'ml' %}selected{% endif %}>мл</option>
+              <option value="g" {% if ing.unit == 'g' %}selected{% endif %}>г</option>
+              <option value="pc" {% if ing.unit == 'pc' %}selected{% endif %}>шт</option>
+            </select>
+            <button type="button" class="btn btn-outline-danger" onclick="this.closest('.ingredient-row').remove()">🗑️</button>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="ingredient-row mb-3 d-flex gap-2">
+          <input type="text" name="ingredient_name[]" class="form-control" placeholder="Название" required />
+          <input type="number" name="ingredient_amount[]" class="form-control" placeholder="Кол-во" min="0" required style="width: 80px;" />
+          <select name="ingredient_unit[]" class="form-select" required style="width: 60px;">
+            <option value="ml">мл</option>
+            <option value="g">г</option>
+            <option value="pc">шт</option>
+          </select>
+          <button type="button" class="btn btn-outline-danger" onclick="this.closest('.ingredient-row').remove()">🗑️</button>
+        </div>
+      {% endif %}
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm mb-3" id="add-ingredient-btn">+ Добавить</button>
+
+    <div class="mb-3">
+      <label class="form-label">Технология</label>
+      <textarea name="object_technology" class="form-control" rows="3" placeholder="Опишите технологию приготовления...">{{ object_to_edit.technology if editing else '' }}</textarea>
+    </div>
+
+    {% if editing %}
+      <button type="submit" class="btn btn-primary w-100">💾 Сохранить изменения</button>
+    {% else %}
+      <button type="submit" class="btn btn-primary w-100">Создать объект</button>
+    {% endif %}
+    </form>
+  </div>
+</div>
+{% endif %}
