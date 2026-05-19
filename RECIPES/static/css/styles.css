@@ -207,23 +207,24 @@ h5 {
 }
 
 
-/* Стили для страницы без боковых колонок */
+/* Для неавторизованных пользователей уменьшить ширину объектов в 3 раза */
 .container-fluid.no-sidebar .row {
-  justify-content: center; /* Центрирование контента по горизонтали */
+  justify-content: center !important;
 }
 
 .container-fluid.no-sidebar .col-12 {
-  max-width: 1000px; /* Максимальная ширина контента */
+  max-width: 33% !important; /* 100% / 3 = ~33% */
   padding: 0 15px;
 }
 
-/* Убедитесь, что объекты не прижимаются к краям */
+/* Убедиться, что объекты не прижимаются к краям */
 .container-fluid.no-sidebar .col-12 {
-  width: 100%;
+  width: 33% !important;
 }
 
+/* Поддержка медиа-запросов для десктопной версии */
 @media (min-width: 992px) {
   .container-fluid.no-sidebar .col-12 {
-    width: 100%; /* Для десктопной версии незалогиненным пользователям */
+    width: 33% !important;
   }
 }

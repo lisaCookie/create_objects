@@ -1,17 +1,19 @@
 /* Аккордеон для карточек объектов */
 .card.accordion-item {
   border: none;
-  border-radius: 0;
-  box-shadow: none;
+  border-radius: 12px;  /* Округлые края */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);  /* Легкая тень для визуального разделения */
   margin-bottom: 1rem;
+  overflow: hidden;  /* Для корректного отображения округлых углов */
 }
 
 .card.accordion-item .card-header {
   background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: none;  /* Удаляем нижнюю границу для аккордеона с закругленными углами */
   cursor: pointer;
   padding: 0.75rem 1rem;
   position: relative;
+  border-radius: 12px 12px 0 0;  /* Верхние углы закруглены, нижние - нет */
 }
 
 .card.accordion-item .card-header:hover {
@@ -40,6 +42,8 @@
   border-top: none;
   padding: 0;
   background-color: white;
+  border-radius: 0 0 12px 12px;  /* Нижние углы закруглены */
+  overflow: hidden;  /* Для корректного отображения содержимого */
 }
 
 .card.accordion-item .card-body .accordion-content {
