@@ -145,4 +145,3 @@ def edit_category(category_id):
         flash(str(e))
         return redirect(url_for('index'))
 
-
