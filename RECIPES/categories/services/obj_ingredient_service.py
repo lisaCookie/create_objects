@@ -30,3 +30,16 @@ def insert_ingredients_for_object(object_id, ingredient_names, ingredient_amount
 
     if ingredient_data:
         insert_ingredients_for_object_rep(object_id, ingredient_data)
+
+
+def parse_ingredients_for_object(ingredient_names, ingredient_amounts, ingredient_units):
+
+    ingredients = []
+    for i in range(len(ingredient_names)):
+        name = ingredient_names[i].strip()
+        amount = ingredient_amounts[i].strip()
+        unit = ingredient_units[i].strip() if i < len(ingredient_units) else 'ml'
+
+        if name:  # Проверяем только имя (количество может быть пустым)
+            ingredients.append((name, amount, unit))
+    return ingredients

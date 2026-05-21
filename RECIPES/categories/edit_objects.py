@@ -3,8 +3,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from RECIPES.categories.services.object_service import edit_obj, get_object_by_id
 from RECIPES.categories.repositories.object_repository import ObjectRepository
-from RECIPES.categories.services.obj_category_service import get_all_categories_with_hierarchy, edit_category_service, get_category_detail_owner_check, get_category_by_id
-from RECIPES.categories.services.obj_comment_service import edit_comment_service, get_comment_by_id, can_edit 
+from RECIPES.categories.services.obj_category_service import  edit_category_service, get_category_detail_owner_check, get_category_by_id
+from RECIPES.categories.services.obj_comment_service import edit_comment_service, get_comment_by_id, can_edit
+from RECIPES.categories.services.obj_ingredient_service import parse_ingredients_for_object, get_ingredients_by_object_id
+
 
 edit_objects_bp = Blueprint('edit_objects', __name__)
 
@@ -22,7 +24,6 @@ def edit_object(object_id):
 
     try:
         if request.method == 'POST':
-            # Сохраняем название объекта в отдельную переменную
             object_name = request.form.get('object_name', '').strip()
             description = request.form.get('object_description', '').strip()
             technology = request.form.get('object_technology', '').strip()
@@ -31,35 +32,29 @@ def edit_object(object_id):
                 flash('Название объекта не может быть пустым.')
                 return redirect(url_for('edit_objects.edit_object', object_id=object_id))
 
-            # Обработка ингредиентов
-            ingredients = []
+            # --- Новый вызов сервиса для обработки ингредиентов ---
             ingredient_names = request.form.getlist('ingredient_name[]')
             ingredient_amounts = request.form.getlist('ingredient_amount[]')
             ingredient_units = request.form.getlist('ingredient_unit[]')
+            ingredients = parse_ingredients_for_object(  # Вызов сервиса
+                ingredient_names,
+                ingredient_amounts,
+                ingredient_units
+            )
 
-            for i in range(len(ingredient_names)):
-                # Используем новую переменную для имени ингредиента
-                ingr_name = ingredient_names[i].strip()
-                amount = ingredient_amounts[i].strip()
-                unit = ingredient_units[i].strip() if i < len(ingredient_units) else 'ml'
-
-                if ingr_name:
-                    ingredients.append((ingr_name, amount, unit))
-
-            # Передаём правильные параметры: object_name вместо name!
             edit_obj(
                 object_id=object_id,
-                name=object_name,  # Исправлено: передаём сохранившееся название
+                name=object_name,
                 description=description,
                 technology=technology,
-                ingredients=ingredients,
+                ingredients=ingredients,  # Передаём уже обработанные данные
                 user_id=session['user_id']
             )
             flash('Объект успешно обновлён!')
             return redirect(url_for('objects.category_page', category_id=obj['category_id']))
 
-        else:  # GET-запрос (отображение формы)
-            ingredients = ObjectRepository.get_ingredients(object_id)
+        else:
+            ingredients = get_ingredients_by_object_id(object_id)  # Вызов сервиса для GET-запроса
             return render_template(
                 'categorypage.html',
                 category=obj,
@@ -70,6 +65,7 @@ def edit_object(object_id):
     except ValueError as e:
         flash(str(e))
         return redirect(url_for('edit_objects.edit_object', object_id=object_id))
+
 
 
     
