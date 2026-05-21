@@ -1,22 +1,51 @@
 # RECIPES/categories/services/obj_comment_service.py
+
+from RECIPES.categories.repositories.comment_repository import CommentRepository
 from RECIPES.database.db_init import get_db_connection
+from RECIPES.categories.services.admin_permission_service import has_admin_access
+
 
 def get_comments_by_object_id(object_id):
-    conn = get_db_connection()
-    with conn:
-        comments = conn.execute("""
-            SELECT co.text, co.created_at, u.username
-            FROM comments co
-            JOIN users u ON co.user_id = u.id
-            WHERE co.object_id = ?
-            ORDER BY co.created_at DESC
-        """, (object_id,)).fetchall()
-        return [dict(row) for row in comments]
+    """Возвращает список комментариев по ID объекта."""
+    return CommentRepository.get_by_object_id(object_id)
 
 def create_comment(object_id, user_id, text):
-    conn = get_db_connection()
-    with conn:
-        conn.execute("""
-            INSERT INTO comments (object_id, user_id, text)
-            VALUES (?, ?, ?)
-        """, (object_id, user_id, text))
+    """Создает новый комментарий."""
+    if not text or not text.strip():
+        raise ValueError("Текст комментария не может быть пустым")
+
+    CommentRepository.create(object_id, user_id, text)
+
+def get_comment_by_id(comment_id):
+    """Возвращает комментарий по ID."""
+    return CommentRepository.get_by_id(comment_id)
+
+def can_edit(user_id, owner_id):
+    """Проверяет, может ли пользователь редактировать комментарий"""
+    return user_id == owner_id or has_admin_access(user_id)
+
+def edit_comment_service(comment_id, text, user_id):
+    """Редактирует комментарий."""
+    if not text or not text.strip():
+        raise ValueError("Текст комментария не может быть пустым")
+
+    comment = CommentRepository.get_by_id(comment_id)
+    if not comment:
+        raise ValueError("Комментарий не найден")
+
+    if not can_edit(user_id, comment['user_id']):
+        raise ValueError("Вы не можете редактировать чужой комментарий")
+
+    CommentRepository.update(comment_id, text)
+
+def delete_comment_service(comment_id, user_id):
+    dependencies = CommentRepository.get_dependencies(comment_id)
+    if not dependencies:
+        raise ValueError("Комментарий не найден")
+
+    # Админ может удалять любые комментарии
+    # Обычный пользователь только свои
+    if dependencies['user_id'] != user_id and not has_admin_access(user_id):
+        raise ValueError("Вы можете удалять только свои комментарии")
+
+    CommentRepository.delete(comment_id)

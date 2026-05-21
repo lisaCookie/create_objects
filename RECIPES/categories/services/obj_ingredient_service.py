@@ -1,27 +1,32 @@
 # RECIPES/categories/services/obj_ingredient_service.py
-from RECIPES.database.db_init import get_db_connection
+
+from RECIPES.categories.repositories.ingredient_repository import (
+    get_ingredients_by_object_id_rep,
+    insert_ingredients_for_object_rep
+)
 
 def get_ingredients_by_object_id(object_id):
-    conn = get_db_connection()
-    with conn:
-        ingredients = conn.execute("""
-            SELECT name, amount, unit
-            FROM ingredients
-            WHERE object_id = ?
-            ORDER BY name
-        """, (object_id,)).fetchall()
-        return [dict(row) for row in ingredients]
+    """Возвращает список ингредиентов для объекта (биндинг с репозиторием)."""
+    return get_ingredients_by_object_id_rep(object_id)
+
 
 def insert_ingredients_for_object(object_id, ingredient_names, ingredient_amounts, ingredient_units):
-    conn = get_db_connection()
-    with conn:
-        for i in range(len(ingredient_names)):
-            name = ingredient_names[i].strip()
-            amount = ingredient_amounts[i].strip()
-            unit = ingredient_units[i] if i < len(ingredient_units) else 'ml'
+    """
+    Вставляет ингредиенты для объекта.
+    Преобразует входные данные в формат для репозитория и делегирует выполнение.
+    """
+    ingredient_data = []
+    for i in range(len(ingredient_names)):
+        name = ingredient_names[i].strip()
+        amount = ingredient_amounts[i].strip()
+        unit = ingredient_units[i] if i < len(ingredient_units) else 'ml'
 
-            if name and amount and amount.isdigit() and int(amount) >= 0:
-                conn.execute("""
-                    INSERT INTO ingredients (object_id, name, amount, unit)
-                    VALUES (?, ?, ?, ?)
-                """, (object_id, name, int(amount), unit))
+        if name and amount and amount.isdigit() and int(amount) >= 0:
+            ingredient_data.append({
+                'name': name,
+                'amount': int(amount),
+                'unit': unit
+            })
+
+    if ingredient_data:
+        insert_ingredients_for_object_rep(object_id, ingredient_data)

@@ -1,104 +1,65 @@
 # RECIPES/categories/delete_objects.py
+
 from flask import Blueprint, redirect, url_for, flash, session
-from RECIPES.database.db_init import get_db_connection
+from RECIPES.categories.services.object_service import get_object_by_id, delete_obj
+from RECIPES.categories.services.obj_category_service import delete_category_service
+from RECIPES.categories.services.obj_comment_service import delete_comment_service, get_comment_by_id
 
 delete_objects_bp = Blueprint('delete_objects', __name__)
 
+# RECIPES/categories/delete_objects.py
 @delete_objects_bp.route('/object/<int:object_id>/delete', methods=['POST'])
 def delete_object(object_id):
     if 'user_id' not in session:
         flash('Вы должны быть авторизованы для удаления объекта.')
         return redirect(url_for('login.login'))
 
-    conn = get_db_connection()
-    with conn:
-        obj = conn.execute("""
-            SELECT created_by, category_id, u.is_admin
-            FROM objects o
-            JOIN users u ON o.created_by = u.id
-            WHERE o.id = ?
-        """, (object_id,)).fetchone()
+    obj = get_object_by_id(object_id)  # Проверяем объект перед доступом к category_id
+    if obj is None:
+        flash('Объект не найден.')
+        return redirect(url_for('index'))
 
-        if not obj:
-            flash("Объект не найден.")
-            return redirect(url_for('index'))
-
-        # Разрешаем удаление: если это свой объект ИЛИ пользователь — админ
-        if obj['created_by'] != session['user_id'] and not session.get('is_admin'):
-            flash("Вы можете удалять только свои объекты.")
-            return redirect(url_for('objects.category_page', category_id=obj['category_id']))
-
-        # Удаляем зависимости
-        conn.execute("DELETE FROM ingredients WHERE object_id = ?", (object_id,))
-        conn.execute("DELETE FROM comments WHERE object_id = ?", (object_id,))
-        conn.execute("DELETE FROM objects WHERE id = ?", (object_id,))
-
+    try:
+        delete_obj(object_id, session['user_id'])
         flash("Объект и его ингредиенты/комментарии удалены.")
-        return redirect(url_for('objects.category_page', category_id=obj['category_id']))
+        return redirect(url_for('objects.category_page', category_id=obj['category_id']))  # Без .get(), так как объект проверен
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for('objects.category_page', category_id=obj['category_id']))  # Если ошибка, но объект есть
+    
 
-
-
-# ================================================
-# ✅ ДОБАВЛЕНО: УДАЛЕНИЕ КОММЕНТАРИЯ
-# ================================================
 @delete_objects_bp.route('/comment/<int:comment_id>/delete', methods=['POST'])
 def delete_comment(comment_id):
     if 'user_id' not in session:
         flash('Вы должны быть авторизованы для удаления комментария.')
         return redirect(url_for('login.login'))
 
-    conn = get_db_connection()
-    with conn:
-        comment = conn.execute("""
-            SELECT c.user_id, c.object_id, u.is_admin
-            FROM comments c
-            JOIN users u ON c.user_id = u.id
-            WHERE c.id = ?
-        """, (comment_id,)).fetchone()
-
-        if not comment:
-            flash("Комментарий не найден.")
-            return redirect(url_for('index'))
-
-        # Разрешаем удаление: если это свой комментарий ИЛИ админ
-        if comment['user_id'] != session['user_id'] and not session.get('is_admin'):
-            flash("Вы можете удалять только свои комментарии.")
-            return redirect(url_for('objects.category_page', category_id=comment['object_id']))
-
-        conn.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    try:
+        delete_comment_service(comment_id, session['user_id'])
         flash("Комментарий удалён.")
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for('index'))
 
+    # Найти объект комментария для редиректа на страницу категории
+    comment = get_comment_by_id(comment_id)
+    if comment:
         return redirect(url_for('objects.category_page', category_id=comment['object_id']))
+    return redirect(url_for('index'))
 
 
-# ================================================
-# ✅ ДОБАВЛЕНО: УДАЛЕНИЕ КАТЕГОРИИ
-# ================================================
+
+
 @delete_objects_bp.route('/category/<int:category_id>/delete', methods=['POST'])
 def delete_category(category_id):
     if 'user_id' not in session:
         flash('Вы должны быть авторизованы для удаления категории.')
         return redirect(url_for('login.login'))
 
-    conn = get_db_connection()
-    with conn:
-        category = conn.execute("""
-            SELECT c.created_by, u.is_admin, c.parent_id
-            FROM categories c
-            JOIN users u ON c.created_by = u.id
-            WHERE c.id = ?
-        """, (category_id,)).fetchone()
-
-        if not category:
-            flash("Категория не найдена.")
-            return redirect(url_for('index'))
-
-        # Проверка прав: только админ
-        if not session.get('is_admin'):
-            flash("Только администратор может удалять категории.")
-            return redirect(url_for('index'))
-
-        # Удаляем категорию — CASCADE автоматически удалит подкатегории и связанные объекты
-        conn.execute("DELETE FROM categories WHERE id = ?", (category_id,))
+    try:
+        delete_category_service(category_id, session['user_id'])
         flash("Категория и все её подкатегории/объекты удалены.")
+        return redirect(url_for('index'))
+    except ValueError as e:
+        flash(str(e))
         return redirect(url_for('index'))

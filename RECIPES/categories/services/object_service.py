@@ -1,80 +1,71 @@
 # RECIPES/categories/services/object_service.py
-from RECIPES.database.db_init import get_db_connection
-import sqlite3
 
+from RECIPES.database.db_init import get_db_connection
+from RECIPES.categories.repositories.object_repository import ObjectRepository
+from RECIPES.categories.services.admin_permission_service import has_admin_access
+
+# ===== Основные функции CRUD =====
 
 def get_objects_by_category_id(category_id, user_id=None):
-    """ Возвращает объекты для указанной категории.
-        Если user_id не предоставлен (т.е. гость), возвращает только объекты, видимые гостям.
-    """
-    conn = get_db_connection()
-    with conn:
-        cursor = conn.cursor()
-        query = """
-            SELECT 
-                o.id, 
-                o.name, 
-                o.description, 
-                o.technology, 
-                o.created_by,
-                u.username AS created_by_username, 
-                o.created_at, 
-                o.visible_to_guests
-            FROM objects o 
-            JOIN users u ON o.created_by = u.id 
-            WHERE o.category_id = ?
-        """
-        params = [category_id]
+    """Возвращает объекты по ID категории (с учетом прав доступа)."""
+    return ObjectRepository.get_by_category(category_id, user_id)
 
-        # Если пользователь не авторизован — фильтруем по visible_to_guests
-        if user_id is None:
-            query += " AND o.visible_to_guests = 1"
+def create_obj(name, description, category_id, created_by, technology=None):
+    """Создает новый объект (проверяет обязательные поля)."""
+    if not name or not name.strip():
+        raise ValueError("Имя объекта не может быть пустым")
+    return ObjectRepository.create(name, description, category_id, created_by, technology)
 
-        query += " ORDER BY o.created_at DESC"
-        cursor.execute(query, tuple(params))
-        return cursor.fetchall()
-
-    
-def create_obj(name, description, category_id, created_by, technology):
-    conn = get_db_connection()
-    with conn:
-        try:
-            result = conn.execute("""
-                INSERT INTO objects (name, description, category_id, created_by, technology)
-                VALUES (?, ?, ?, ?, ?)
-            """, (name, description, category_id, created_by, technology))
-            return result.lastrowid
-        except sqlite3.IntegrityError:
-            raise ValueError("Имя уже занято.")
-        
 def insert_object(name, description, category_id, user_id, technology=None):
-    conn = get_db_connection()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO objects (name, description, technology, category_id, created_by)
-            VALUES (?, ?, ?, ?, ?)
-        """, (name, description, technology, category_id, user_id))
-        return cursor.lastrowid
+    """Аналог create_obj, но с явно указанным user_id."""
+    return ObjectRepository.insert(name, description, category_id, user_id, technology)
 
 def get_object_by_id(object_id, user_id=None):
-    conn = get_db_connection()
-    with conn:
-        obj = conn.execute("""
-            SELECT o.id, o.name, o.description, o.technology, o.created_at,
-            c.name AS category_name, o.visible_to_guests, o.category_id
-            FROM objects o
-            JOIN categories c ON o.category_id = c.id
-            WHERE o.id = ?
-        """, (object_id,)).fetchone()
+    """Возвращает объект по ID (с учетом доступа)."""
+    return ObjectRepository.get_by_id(object_id, user_id)
 
-        if not obj:
-            return None
+# ===== Удаление и редактирование =====
 
-        obj = dict(obj)
+def delete_obj(object_id, user_id):
+    obj = ObjectRepository.get_dependencies(object_id)
+    if not obj:
+        raise ValueError("Объект не найден")
 
-    # Проверка видимости для гостей
-        if obj['visible_to_guests'] == 0 and not user_id:
-            return None
+    # Админ может удалять любые объекты
+    # Обычный пользователь только свои
+    if obj['created_by'] != user_id and not has_admin_access(user_id):
+        raise ValueError("Вы можете удалять только свои объекты")
 
-        return obj
+    ObjectRepository.delete(object_id)
+
+def edit_obj(object_id, name, description, technology, ingredients, user_id):
+    """Редактирует объект и обновляет ингредиенты."""
+    if not name or not name.strip():
+        raise ValueError("Название объекта не может быть пустым")
+
+    obj = ObjectRepository.get_by_id(object_id)
+    if not obj:
+        raise ValueError("Объект не найден")
+
+    # Админ может редактировать любые объекты
+    # Обычный пользователь только свои
+    if obj['created_by'] != user_id and not has_admin_access(user_id):
+        raise ValueError("Вы не можете редактировать чужой объект")
+
+    ObjectRepository.update(name, description, technology, object_id)
+    ObjectRepository.clear_ingredients(object_id)
+    ObjectRepository.add_ingredients(object_id, ingredients)
+
+# ===== Проверка прав доступа =====
+
+def can_edit(user_id, owner_id, conn=None):
+    """Проверяет, может ли пользователь редактировать объект (в том числе администраторы)."""
+    if user_id == owner_id:
+        return True
+
+    conn = conn or get_db_connection()
+    admin_status = conn.execute(
+        "SELECT is_admin FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+
+    return admin_status and admin_status['is_admin']

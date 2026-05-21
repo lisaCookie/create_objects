@@ -78,8 +78,8 @@ def init_users_table():
                     user_id INTEGER NOT NULL,
                     text TEXT NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (object_id) REFERENCES objects (id),
-                    FOREIGN KEY (user_id) REFERENCES users (id)
+                    FOREIGN KEY (object_id) REFERENCES objects (id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
                 )
             """)
 

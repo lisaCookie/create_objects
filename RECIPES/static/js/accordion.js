@@ -1,3 +1,5 @@
+// RECIPES/static/js/accordion.js
+
 document.addEventListener('DOMContentLoaded', function() {
   // Найти все карточки с классом 'accordion-item'
   const accordionItems = document.querySelectorAll('.accordion-item');

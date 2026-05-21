@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from RECIPES.categories.services.object_service import get_objects_by_category_id, create_obj, get_object_by_id
 from RECIPES.categories.services.obj_category_service import create_subcat, get_category_by_id, get_category_detail_owner_check
-from RECIPES.categories.services.obj_ingredient_service import get_ingredients_by_object_id, insert_ingredients_for_object
+from RECIPES.categories.services.obj_ingredient_service import get_ingredients_by_object_id_rep, insert_ingredients_for_object
 from RECIPES.categories.services.obj_comment_service import get_comments_by_object_id, create_comment
-from .sitemap import get_root_categories, get_children_and_objects
+from RECIPES.categories.repositories.sitemap_repository import SitemapRepository
 
 
 objects_bp = Blueprint('objects', __name__, template_folder='../templates')
@@ -20,7 +20,7 @@ def category_page(category_id):
     objects = get_objects_by_category_id(category_id, session.get('user_id'))
     objects_with_ingredients = []
     for obj in objects:
-        ingredients = get_ingredients_by_object_id(obj['id'])
+        ingredients = get_ingredients_by_object_id_rep(obj['id'])
         comments = get_comments_by_object_id(obj['id'])
         objects_with_ingredients.append({
             'object': obj,
@@ -118,7 +118,7 @@ def object_detail(object_id):
         flash("Объект не найден или недоступен.")
         return redirect(url_for('index'))
 
-    ingredients = get_ingredients_by_object_id(object_id)
+    ingredients = get_ingredients_by_object_id_rep(object_id)
     comments = get_comments_by_object_id(object_id)
 
     return render_template('object_detail.html', object=obj, ingredients=ingredients, comments=comments, category_id=obj['category_id'])
@@ -127,13 +127,12 @@ def object_detail(object_id):
 # --- Sitemap: корневые категории ---
 @objects_bp.route('/sitemap')
 def sitemap():
-    root_categories = get_root_categories()
+    root_categories = SitemapRepository.get_root_categories()
     return render_template('sitemap_lazy.html', root_categories=root_categories)
 
-# --- Sitemap: дочерние категории и объекты ---
 @objects_bp.route('/sitemap/children/<int:category_id>')
 def sitemap_children(category_id):
-    children, objects = get_children_and_objects(category_id, session.get('user_id'))
+    children, objects = SitemapRepository.get_children_and_objects(category_id, session.get('user_id'))
     return jsonify({'children': children, 'objects': objects})
 
 
