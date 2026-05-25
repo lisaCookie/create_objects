@@ -3,6 +3,8 @@
 from RECIPES.database.db_init import get_db_connection
 from RECIPES.categories.repositories.object_repository import ObjectRepository
 from RECIPES.categories.services.admin_permission_service import has_admin_access
+from RECIPES.categories.validation import validate_not_empty, validate_object_exists
+
 
 # ===== Основные функции CRUD =====
 
@@ -12,8 +14,7 @@ def get_objects_by_category_id(category_id, user_id=None):
 
 def create_obj(name, description, category_id, created_by, technology=None):
     """Создает новый объект (проверяет обязательные поля)."""
-    if not name or not name.strip():
-        raise ValueError("Имя объекта не может быть пустым")
+    validate_not_empty(name, "Имя объекта")
     return ObjectRepository.create(name, description, category_id, created_by, technology)
 
 def insert_object(name, description, category_id, user_id, technology=None):
@@ -28,11 +29,8 @@ def get_object_by_id(object_id, user_id=None):
 
 def delete_obj(object_id, user_id):
     obj = ObjectRepository.get_dependencies(object_id)
-    if not obj:
-        raise ValueError("Объект не найден")
+    validate_object_exists(obj, "Объект не найден")
 
-    # Админ может удалять любые объекты
-    # Обычный пользователь только свои
     if obj['created_by'] != user_id and not has_admin_access(user_id):
         raise ValueError("Вы можете удалять только свои объекты")
 
@@ -40,32 +38,22 @@ def delete_obj(object_id, user_id):
 
 def edit_obj(object_id, name, description, technology, ingredients, user_id):
     """Редактирует объект и обновляет ингредиенты."""
-    if not name or not name.strip():
-        raise ValueError("Название объекта не может быть пустым")
+    validate_not_empty(name, "Название объекта")
 
+    # Проверка существования объекта
     obj = ObjectRepository.get_by_id(object_id)
-    if not obj:
-        raise ValueError("Объект не найден")
+    validate_object_exists(obj, "Объект не найден")
 
-    # Админ может редактировать любые объекты
-    # Обычный пользователь только свои
+    # Проверка прав доступа
     if obj['created_by'] != user_id and not has_admin_access(user_id):
         raise ValueError("Вы не можете редактировать чужой объект")
 
+    # Проверка уникальности имени (кроме текущего объекта)
+    existing_obj = ObjectRepository.get_by_name(name, object_id)  # Нужно добавить этот метод
+    if existing_obj:
+        raise ValueError("Объект с таким именем уже существует")
+
+    # Обновление данных
     ObjectRepository.update(name, description, technology, object_id)
     ObjectRepository.clear_ingredients(object_id)
     ObjectRepository.add_ingredients(object_id, ingredients)
-
-# ===== Проверка прав доступа =====
-
-def can_edit(user_id, owner_id, conn=None):
-    """Проверяет, может ли пользователь редактировать объект (в том числе администраторы)."""
-    if user_id == owner_id:
-        return True
-
-    conn = conn or get_db_connection()
-    admin_status = conn.execute(
-        "SELECT is_admin FROM users WHERE id = ?", (user_id,)
-    ).fetchone()
-
-    return admin_status and admin_status['is_admin']

@@ -2,6 +2,7 @@
 from RECIPES.database.db_init import get_db_connection
 from RECIPES.categories.repositories.category_repository import CategoryRepository
 from RECIPES.categories.services.admin_permission_service import has_admin_access
+from RECIPES.categories.validation import validate_not_empty, check_category_ownership, validate_object_exists
 
 
 def get_category_by_id(category_id):
@@ -9,28 +10,20 @@ def get_category_by_id(category_id):
 
 
 def create_category(name, created_by, parent_id=None):
-    if not name or not name.strip():
-        raise ValueError("Имя категории не может быть пустым")
-
+    validate_not_empty(name, "Имя категории")
     if parent_id is not None and not CategoryRepository.check_parent_exists(parent_id):
         raise ValueError("Родительская категория не найдена")
-
     return CategoryRepository.create(name, created_by, parent_id)
 
 
 def create_subcat(name, created_by, parent_id):
-    if not name or not name.strip():
-        raise ValueError("Название подкатегории не может быть пустым")
-
+    validate_not_empty(name, "Название подкатегории")
     if not parent_id:
         raise ValueError("Не указан родительский идентификатор категории")
-
     if not CategoryRepository.check_parent_exists(parent_id):
         raise ValueError("Родительская категория не найдена")
-
     if CategoryRepository.check_subcategory_exists(name, parent_id):
         raise ValueError("Подкатегория с таким именем уже существует в этой категории")
-
     return CategoryRepository.create(name, created_by, parent_id)
 
 
@@ -65,34 +58,22 @@ def get_category_detail_owner_check(category_id, user_id):
 
 
 def edit_category_service(category_id, name, user_id):
-    if not name or not name.strip():
-        raise ValueError("Название категории не может быть пустым")
-
-    is_admin = has_admin_access(user_id)
+    validate_not_empty(name, "Название категории")
     owner_check = CategoryRepository.get_owner_check(category_id, user_id)
 
-    # Админ может редактировать любые категории
-    # Обычный пользователь только свои
-    if not is_admin and (not owner_check or not owner_check['can_edit']):
+    if not check_category_ownership(owner_check):
         raise ValueError("У вас нет прав на редактирование этой категории")
 
     CategoryRepository.update(name.strip(), category_id)
 
 
 def delete_category_service(category_id, user_id):
-    # Проверка прав админа
     is_admin_row = get_db_connection().execute(
         "SELECT is_admin FROM users WHERE id = ?", (user_id,)
     ).fetchone()
-    is_admin = is_admin_row and is_admin_row['is_admin']
-
-    if not is_admin:
+    if not is_admin_row or not is_admin_row['is_admin']:
         raise ValueError("Только администратор может удалять категории")
 
-    # Проверяем, что категория существует
     category = CategoryRepository.get_by_id(category_id)
-    if not category:
-        raise ValueError("Категория не найдена")
-
-    # ВСЁ ДАЛЬНЕЙШЕЕ УДАЛИЛ! Каскадное удаление происходит автоматически на уровне БД
-    CategoryRepository.delete(category_id)  # <-- Теперь это достаточно
+    validate_object_exists(category, "Категория не найдена")
+    CategoryRepository.delete(category_id)

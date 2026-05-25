@@ -1,20 +1,13 @@
 # RECIPES/utils/filters.py
 
 from typing import List, Dict, Any, Optional
+from .db_filters import search_objects_sql
 
 
 def filter_categories_by_search(categories: List[Dict[str, Any]], search_term: str) -> List[Dict[str, Any]]:
-    """
-    Рекурсивно фильтрует дерево категорий по поисковому запросу.
-    Возвращает копию дерева с отфильтрованными категориями.
-    
-    :param categories: Список категорий с иерархией (с ключом 'children')
-    :param search_term: Поисковая строка (регистронезависимая)
-    :return: Отфильтрованное дерево категорий
-    """
+    """ Рекурсивно фильтрует дерево категорий по поисковому запросу. """
     if not search_term:
         return categories
-
     search_term = search_term.strip().lower()
 
     def _filter_node(cat: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -22,7 +15,6 @@ def filter_categories_by_search(categories: List[Dict[str, Any]], search_term: s
         children = cat.get('children', [])
         filtered_children = [_filter_node(child) for child in children]
         filtered_children = [child for child in filtered_children if child is not None]
-
         if matches or filtered_children:
             cat_copy = cat.copy()
             cat_copy['children'] = filtered_children
@@ -33,25 +25,12 @@ def filter_categories_by_search(categories: List[Dict[str, Any]], search_term: s
 
 
 def search_objects_in_db(conn, search_term: str) -> List[Dict[str, Any]]:
-    """
-    Выполняет поиск объектов по имени в базе данных.
-    
-    :param conn: SQLite соединение
-    :param search_term: Поисковая строка
-    :return: Список объектов с полями id, name, created_at, category_name
-    """
+    """ Выполняет поиск объектов по имени в базе данных. """
     if not search_term:
         return []
-
+    sql, params = search_objects_sql(search_term)
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT o.id, o.name, o.created_at, c.name AS category_name
-        FROM objects o
-        JOIN categories c ON o.category_id = c.id
-        WHERE o.name LIKE ?
-        ORDER BY o.created_at DESC
-    """, ('%' + search_term + '%',))
-
+    cursor.execute(sql, params)
     return [
         {
             'id': row[0],

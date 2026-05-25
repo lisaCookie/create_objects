@@ -2,25 +2,22 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from RECIPES.categories.services.object_service import edit_obj, get_object_by_id
-from RECIPES.categories.repositories.object_repository import ObjectRepository
 from RECIPES.categories.services.obj_category_service import  edit_category_service, get_category_detail_owner_check, get_category_by_id
 from RECIPES.categories.services.obj_comment_service import edit_comment_service, get_comment_by_id, can_edit
 from RECIPES.categories.services.obj_ingredient_service import parse_ingredients_for_object, get_ingredients_by_object_id
+from RECIPES.categories.validation import check_authentication, validate_object_exists, validate_not_empty, check_comment_ownership
 
 
 edit_objects_bp = Blueprint('edit_objects', __name__)
 
-
 @edit_objects_bp.route('/object/<int:object_id>/edit', methods=['GET', 'POST'])
 def edit_object(object_id):
-    if 'user_id' not in session:
+    if not check_authentication():
         flash('Вы должны быть авторизованы для редактирования.')
         return redirect(url_for('login.login'))
 
     obj = get_object_by_id(object_id)
-    if not obj:
-        flash('Объект не найден.')
-        return redirect(url_for('index'))
+    validate_object_exists(obj, 'Объект не найден.')
 
     try:
         if request.method == 'POST':
@@ -28,15 +25,12 @@ def edit_object(object_id):
             description = request.form.get('object_description', '').strip()
             technology = request.form.get('object_technology', '').strip()
 
-            if not object_name:
-                flash('Название объекта не может быть пустым.')
-                return redirect(url_for('edit_objects.edit_object', object_id=object_id))
+            validate_not_empty(object_name, 'Название объекта')
 
-            # --- Новый вызов сервиса для обработки ингредиентов ---
             ingredient_names = request.form.getlist('ingredient_name[]')
             ingredient_amounts = request.form.getlist('ingredient_amount[]')
             ingredient_units = request.form.getlist('ingredient_unit[]')
-            ingredients = parse_ingredients_for_object(  # Вызов сервиса
+            ingredients = parse_ingredients_for_object(
                 ingredient_names,
                 ingredient_amounts,
                 ingredient_units
@@ -47,14 +41,13 @@ def edit_object(object_id):
                 name=object_name,
                 description=description,
                 technology=technology,
-                ingredients=ingredients,  # Передаём уже обработанные данные
+                ingredients=ingredients,
                 user_id=session['user_id']
             )
             flash('Объект успешно обновлён!')
             return redirect(url_for('objects.category_page', category_id=obj['category_id']))
-
         else:
-            ingredients = get_ingredients_by_object_id(object_id)  # Вызов сервиса для GET-запроса
+            ingredients = get_ingredients_by_object_id(object_id)
             return render_template(
                 'categorypage.html',
                 category=obj,
@@ -65,19 +58,18 @@ def edit_object(object_id):
     except ValueError as e:
         flash(str(e))
         return redirect(url_for('edit_objects.edit_object', object_id=object_id))
-
-
-
     
+
 @edit_objects_bp.route('/comment/<int:comment_id>/edit', methods=['GET', 'POST'])
 def edit_comment(comment_id):
-    if 'user_id' not in session:
+    if not check_authentication():
         flash('Вы должны быть авторизованы для редактирования комментария.')
         return redirect(url_for('login.login'))
 
     if request.method == 'POST':
         text = request.form.get('comment_text', '').strip()
         try:
+            validate_not_empty(text, 'Текст комментария')
             edit_comment_service(comment_id, text, session['user_id'])
             flash('Комментарий успешно обновлён!')
         except ValueError as e:
@@ -85,18 +77,12 @@ def edit_comment(comment_id):
             return redirect(url_for('edit_objects.edit_comment', comment_id=comment_id))
 
         comment = get_comment_by_id(comment_id)
-        # Получаем объект после редактирования
-        object_id = comment['object_id']
-        # Сразу редиректим на страницу категории объекта
-        return redirect(url_for('objects.category_page', category_id=object_id, object_id=object_id))
+        return redirect(url_for('objects.category_page', category_id=comment['object_id'], object_id=comment['object_id']))
 
-    # Заполнение формы через сессию (для GET-запроса)
     comment = get_comment_by_id(comment_id)
-    if not comment:
-        flash("Комментарий не найден.")
-        return redirect(url_for('index'))
+    validate_object_exists(comment, 'Комментарий не найден.')
 
-    if not can_edit(session['user_id'], comment['user_id']):
+    if not check_comment_ownership(session['user_id'], comment['user_id']):
         flash("Вы не можете редактировать чужой комментарий.")
         return redirect(url_for('objects.category_page', category_id=comment['object_id']))
 
@@ -105,14 +91,12 @@ def edit_comment(comment_id):
         'text': comment['text'],
         'object_id': comment['object_id']
     }
-    # Во всех случаях редирект на страцу категории объекта
     return redirect(url_for('objects.category_page', category_id=comment['object_id']))
-
 
 
 @edit_objects_bp.route('/category/<int:category_id>/edit', methods=['GET', 'POST'])
 def edit_category(category_id):
-    if 'user_id' not in session:
+    if not check_authentication():
         flash('Вы должны быть авторизованы для редактирования.')
         return redirect(url_for('login.login'))
 
@@ -124,20 +108,14 @@ def edit_category(category_id):
     try:
         if request.method == 'POST':
             name = request.form.get('category_name', '').strip()
-            if not name:
-                flash('Имя категории не может быть пустым')
-                return redirect(url_for('edit_objects.edit_category', category_id=category_id))
+            validate_not_empty(name, 'Имя категории')
 
-            # Вызов исправленной функции
-            edit_category_service(category_id, name, session['user_id'])  # ← Теперь это корректно
+            edit_category_service(category_id, name, session['user_id'])
             flash('Категория успешно обновлена!')
             return redirect(url_for('objects.category_page', category_id=category_id))
-        else:  # GET-запрос
+        else:
             category = get_category_by_id(category_id)
-            return render_template('edit_category.html',
-                                category=category,
-                                category_id=category_id)
+            return render_template('edit_category.html', category=category, category_id=category_id)
     except ValueError as e:
         flash(str(e))
         return redirect(url_for('index'))
-

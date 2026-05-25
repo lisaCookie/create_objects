@@ -3,6 +3,7 @@
 from RECIPES.categories.repositories.comment_repository import CommentRepository
 from RECIPES.database.db_init import get_db_connection
 from RECIPES.categories.services.admin_permission_service import has_admin_access
+from RECIPES.categories.validation import validate_not_empty, validate_object_exists, check_comment_ownership
 
 
 def get_comments_by_object_id(object_id):
@@ -11,9 +12,7 @@ def get_comments_by_object_id(object_id):
 
 def create_comment(object_id, user_id, text):
     """Создает новый комментарий."""
-    if not text or not text.strip():
-        raise ValueError("Текст комментария не может быть пустым")
-
+    validate_not_empty(text, "Текст комментария")
     CommentRepository.create(object_id, user_id, text)
 
 def get_comment_by_id(comment_id):
@@ -25,26 +24,22 @@ def can_edit(user_id, owner_id):
     return user_id == owner_id or has_admin_access(user_id)
 
 def edit_comment_service(comment_id, text, user_id):
-    """Редактирует комментарий."""
-    if not text or not text.strip():
-        raise ValueError("Текст комментария не может быть пустым")
-
+    """Редактирует комментарий. Админ может редактировать любые комментарии."""
+    validate_not_empty(text, "Текст комментария")
     comment = CommentRepository.get_by_id(comment_id)
-    if not comment:
-        raise ValueError("Комментарий не найден")
+    validate_object_exists(comment, "Комментарий не найден")
 
-    if not can_edit(user_id, comment['user_id']):
+    # Если юзер - автор комментария или админ, разрешаем редактирование
+    if user_id != comment['user_id'] and not has_admin_access(user_id):
         raise ValueError("Вы не можете редактировать чужой комментарий")
 
     CommentRepository.update(comment_id, text)
+    
 
 def delete_comment_service(comment_id, user_id):
     dependencies = CommentRepository.get_dependencies(comment_id)
-    if not dependencies:
-        raise ValueError("Комментарий не найден")
+    validate_object_exists(dependencies, "Комментарий не найден")
 
-    # Админ может удалять любые комментарии
-    # Обычный пользователь только свои
     if dependencies['user_id'] != user_id and not has_admin_access(user_id):
         raise ValueError("Вы можете удалять только свои комментарии")
 

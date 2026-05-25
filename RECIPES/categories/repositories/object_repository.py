@@ -63,6 +63,24 @@ class ObjectRepository:
                 return result.lastrowid
             except Exception as e:
                 raise e
+            
+    @staticmethod
+    def get_by_name(name, exclude_id=None):
+        """Проверяет существование объекта с данным именем (кроме указанного ID)."""
+        conn = get_db_connection()
+        with conn:
+            query = """
+                SELECT id FROM objects
+                WHERE name = ?
+            """
+            params = (name,)
+
+            if exclude_id is not None:
+                query += " AND id != ?"
+                params = (name, exclude_id)
+
+            return conn.execute(query, params).fetchone() is not None
+
 
     @staticmethod
     def insert(name, description, category_id, user_id, technology=None):
