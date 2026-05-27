@@ -15,8 +15,9 @@ from RECIPES.categories.objects_visibility import visibility_bp
 from RECIPES.utils.filters import filter_categories_by_search, search_objects_in_db  # <-- НОВЫЙ ИМПОРТ
 from dotenv import load_dotenv
 import os
-import sqlite3
+import psycopg2
 from datetime import datetime
+from time import sleep
 
 load_dotenv()
 
@@ -69,22 +70,22 @@ def index():
 @app.route("/create_category", methods=['POST'])
 def create_category():
     if 'user_id' not in session:
-        flash('You must be logged in to create a category.')
+        flash('Вы должны быть авторизованы для создания категории.')
         return redirect(url_for('index'))
 
     category_name = request.form.get('category_name', '').strip()
     if not category_name:
-        flash('Category name cannot be empty.')
+        flash('Название категории не должно быть пустым.')
         return redirect(url_for('index'))
 
     conn = get_db_connection()
     with conn:
         try:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO categories (name, created_by) VALUES (?, ?)", (category_name, session['user_id']))
-            flash(f'Category "{category_name}" created successfully!')
-        except sqlite3.IntegrityError:
-            flash(f'Category "{category_name}" already exists.')
+            cursor.execute("INSERT INTO categories (name, created_by) VALUES (%s, %s)", (category_name, session['user_id']))
+            flash(f'Категория "{category_name}" создана успешно!')
+        except psycopg2.IntegrityError:
+            flash(f'Категория "{category_name}" с таким названием уже существует.')
         return redirect(url_for('index'))
 
 # Фильтр для даты
@@ -107,5 +108,9 @@ def sitemap():
 
 if __name__ == "__main__":
     from RECIPES.database.db_init import init_users_table
-    init_users_table()
-    app.run(host="0.0.0.0", port=5000)
+    try:
+        sleep(3)  # Задержка для запуска PostgreSQL
+        init_users_table()
+        app.run(host="0.0.0.0", port=5000, debug=True)
+    except Exception as e:
+        print(f"Ошибка при запуске приложения: {e}")

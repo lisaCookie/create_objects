@@ -1,3 +1,5 @@
+# RECIPES/categories/objects.py
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from RECIPES.categories.services.object_service import get_objects_by_category_id, create_obj, get_object_by_id
 from RECIPES.categories.services.obj_category_service import create_subcat, get_category_by_id, get_category_detail_owner_check
@@ -50,7 +52,7 @@ def create_object(category_id):  # Имя изменено, чтобы не ко
         flash(str(e))
         return redirect(url_for('objects.category_page', category_id=category_id))
     except Exception:
-        flash('Ошибка при создании объекта.')
+        flash('Объект с таким названием уже существует.')
         return redirect(url_for('objects.category_page', category_id=category_id))
 
     # Передаём всё в сервис — он сам разберётся с ингредиентами
@@ -108,6 +110,7 @@ def create_subcategory(category_id):
         flash('Ошибка при создании подкатегории.')
 
     return redirect(url_for('objects.category_page', category_id=category_id))
+
 
 
 # --- Детали объекта ---

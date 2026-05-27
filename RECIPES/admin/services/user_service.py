@@ -7,10 +7,11 @@ def delete_user(user_id, current_user_id):
 
     conn = get_db_connection()
     with conn:
+        cursor = conn.cursor()
         # Удаляем все связанные данные
-        conn.execute("DELETE FROM objects WHERE created_by = ?", (user_id,))
-        conn.execute("DELETE FROM comments WHERE user_id = ?", (user_id,))
-        conn.execute("DELETE FROM categories WHERE created_by = ?", (user_id,))
-        conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        cursor.execute("DELETE FROM objects WHERE created_by = %s", (user_id,))
+        cursor.execute("DELETE FROM comments WHERE user_id = %s", (user_id,))
+        cursor.execute("DELETE FROM categories WHERE created_by = %s", (user_id,))
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
 
     return True

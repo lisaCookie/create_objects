@@ -1,0 +1,17 @@
+<!-- comment_edit.html -->
+
+{% block content %}
+    <div class="container">
+        <h2>Редактирование комментария</h2>
+        <form method="POST">
+            <textarea
+                name="comment_text"
+                rows="5"
+                cols="80"
+                required
+            >{{ session.editing_comment.text }}</textarea>
+            <br>
+            <button type="submit">Сохранить изменения</button>
+        </form>
+    </div>
+{% endblock %}

@@ -26,7 +26,7 @@
           {% if subcat.created_by_username %}Создано: {{ subcat.created_by_username }}{% endif %}
         </p>
         {% if session.get('user_id') and session.user_id == subcat.created_by %}
-          <a href="{{ url_for('objects.category_detail', category_id=subcat.id) }}" class="btn btn-sm btn-warning">Редактировать название категории</a>
+          <a href="{{ url_for('objects.category_detail', category_id=subcat.id) }}" class="btn btn-sm btn-warning">Редактировать название</a>
         {% endif %}
       </div>
     </div>

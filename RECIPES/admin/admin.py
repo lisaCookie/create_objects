@@ -18,11 +18,18 @@ def dashboard():
         return redirect(url_for('login.login'))
 
     conn = dashboard_service.get_db_connection()  # или импортируйте get_db_connection напрямую
-    with conn:
-        user_session = conn.execute("SELECT is_admin FROM users WHERE id = ?", (session['user_id'],)).fetchone()
-        if not user_session or not user_session['is_admin']:
-            flash('У вас нет прав администратора.')
-            return redirect(url_for('index'))
+    try:
+        with conn:
+            cursor = conn.cursor()  # Создаём курсор
+            cursor.execute("SELECT is_admin FROM users WHERE id = %s", (session['user_id'],))
+            user_session = cursor.fetchone()  # Получаем результат через курсор
+
+            if not user_session or not user_session['is_admin']:
+                flash('У вас нет прав администратора.')
+                return redirect(url_for('index'))
+    except Exception as e:
+        flash('Ошибка при проверке прав администратора.', 'danger')
+        return redirect(url_for('index'))
 
     # --- Получаем данные через сервис ---
     filters = {
@@ -111,6 +118,12 @@ def _is_admin():
         return False
     from RECIPES.database.db_init import get_db_connection
     conn = get_db_connection()
-    with conn:
-        user = conn.execute("SELECT is_admin FROM users WHERE id = ?", (session['user_id'],)).fetchone()
-        return user and user['is_admin']
+    try:
+        with conn:
+            cursor = conn.cursor()  # Создаём курсор
+            cursor.execute("SELECT is_admin FROM users WHERE id = %s", (session['user_id'],))
+            user = cursor.fetchone()
+            return user and user['is_admin']
+    except Exception as e:
+        print(f"Ошибка при проверке прав: {e}")
+        return False

@@ -21,7 +21,7 @@ def get_comment_by_id(comment_id):
 
 def can_edit(user_id, owner_id):
     """Проверяет, может ли пользователь редактировать комментарий"""
-    return user_id == owner_id or has_admin_access(user_id)
+    return has_admin_access(user_id) or user_id == owner_id
 
 def edit_comment_service(comment_id, text, user_id):
     """Редактирует комментарий. Админ может редактировать любые комментарии."""
@@ -30,8 +30,8 @@ def edit_comment_service(comment_id, text, user_id):
     validate_object_exists(comment, "Комментарий не найден")
 
     # Если юзер - автор комментария или админ, разрешаем редактирование
-    if user_id != comment['user_id'] and not has_admin_access(user_id):
-        raise ValueError("Вы не можете редактировать чужой комментарий")
+    if not (has_admin_access(user_id) or user_id == comment['user_id']):
+        raise ValueError("Вы не можете редактировать этот комментарий")
 
     CommentRepository.update(comment_id, text)
     

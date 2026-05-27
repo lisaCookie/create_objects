@@ -21,3 +21,11 @@ flash:
 	docker stop my_flask_app
 	docker rm my_flask_app
 	docker run -d -p 5000:5000 --name my_flask_app docker_flask_project
+
+fast:
+	docker-compose down -v 
+	docker-compose up --build
+
+logs-compose:
+	docker-compose logs -f
+	docker-compose logs -f web

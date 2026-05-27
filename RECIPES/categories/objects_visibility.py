@@ -11,32 +11,42 @@ def toggle_visibility(object_id):
         return redirect(url_for('login.login'))
 
     conn = get_db_connection()
-    with conn:
-        # Проверяем, существует ли объект и принадлежит ли он текущему пользователю
-        obj = conn.execute("""
-            SELECT id, created_by FROM objects WHERE id = ?
-        """, (object_id,)).fetchone()
+    try:
+        with conn:
+            cursor = conn.cursor()
 
-        if not obj:
-            flash("Объект не найден.")
-            return redirect(url_for('index'))
+            # Проверяем существование объекта и владельца
+            cursor.execute("""
+                SELECT id, created_by FROM objects WHERE id = %s
+            """, (object_id,))
+            obj = cursor.fetchone()
 
-        if obj['created_by'] != session['user_id']:
-            flash("Вы не можете изменять видимость чужих объектов.")
-            return redirect(url_for('objects.category_page', category_id=obj['category_id']))
+            if not obj:
+                flash("Объект не найден.")
+                return redirect(url_for('index'))
 
-        # Добавляем поле `visible_to_guests` в таблицу objects, если его нет
-        # (Это должно быть сделано при инициализации БД — см. ниже)
-        current_visibility = conn.execute("""
-            SELECT visible_to_guests FROM objects WHERE id = ?
-        """, (object_id,)).fetchone()['visible_to_guests']
+            if obj['created_by'] != session['user_id']:
+                flash("Вы не можете изменять видимость чужих объектов.")
+                return redirect(url_for('objects.category_page', category_id=obj['category_id']))
 
-        new_visibility = not current_visibility
+            # Получаем текущую видимость (да/нет)
+            cursor.execute("""
+                SELECT visible_to_guests FROM objects WHERE id = %s
+            """, (object_id,))
+            current_visibility = cursor.fetchone()['visible_to_guests']
 
-        conn.execute("""
-            UPDATE objects SET visible_to_guests = ? WHERE id = ?
-        """, (new_visibility, object_id))
+            # Меняем статус на противоположный
+            new_visibility = 1 if current_visibility == 0 else 0  # Или int(not current_visibility)
+            cursor.execute("""
+                UPDATE objects
+                SET visible_to_guests = %s
+                WHERE id = %s
+            """, (new_visibility, object_id))
 
-        flash(f"Видимость объекта {'включена для всех' if new_visibility else 'отключена для гостей'}.")
-
-    return redirect(request.referrer or url_for('objects.category_page', category_id=obj['category_id']))
+            flash(f"Видимость объекта {'включена для всех' if new_visibility else 'отключена для гостей'}.")
+            return redirect(request.referrer or url_for('objects.category_page', category_id=obj['category_id']))
+    except Exception as e:
+        flash(f'Ошибка при изменении видимости: {str(e)}')
+        return redirect(url_for('index'))
+    finally:
+        conn.close()

@@ -88,7 +88,6 @@
                                     <form action="{{ url_for('admin.delete_category_admin', category_id=cat.id) }}" method="POST" class="delete-form" onsubmit="return confirm('Удалить категорию {{ cat.name }}?')">
                                         <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
                                     </form>
-                                    <!-- Исправлено: заменена неверная ссылка на корректную форму редактирования -->
                                     <a href="{{ url_for('objects.category_detail', category_id=cat.id) }}" class="btn btn-sm btn-warning">
                                         Редактировать
                                     </a>
@@ -233,18 +232,11 @@
         </div>
       {% else %}
         <div class="mt-3 alert alert-warning">
-          <i class="fas fa-exclamation-triangle"></i> Кодовое слово <strong>не задано</strong>. Пользователи не смогут войти.
+          <i class="fas fa-exclamation-triangle"></i> Кодовое слово <strong>не задано</strong>.
         </div>
       {% endif %}
     </div>
   </div>
-</div>
-
-
-    <!-- Кнопка выхода -->
-    <div class="text-center mt-4">
-        <a href="{{ url_for('login.logout') }}" class="btn btn-outline-danger">Выйти из аккаунта</a>
-    </div>
 </div>
 
 <!-- Bootstrap 5 JS + Popper -->

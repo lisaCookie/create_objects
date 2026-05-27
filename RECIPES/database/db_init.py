@@ -1,39 +1,63 @@
 # RECIPES/users/db_init.py
 import os
-import sqlite3
-from sqlite3 import Row
+import psycopg2
+from psycopg2.extras import DictCursor
+from psycopg2 import sql
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
+from time import sleep
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'recipes.db')
+load_dotenv()
+
+SUPERADMIN_USERNAME = os.getenv("SUPERADMIN_USERNAME")
+SUPERADMIN_PASSWORD = os.getenv("SUPERADMIN_PASSWORD")
+if not SUPERADMIN_USERNAME or not SUPERADMIN_PASSWORD:
+    raise ValueError("SUPERADMIN_USERNAME и SUPERADMIN_PASSWORD должны быть заданы в переменных окружения!")
+
+DB_URL = os.getenv("DATABASE_URL")
 
 def get_db_connection():
-    """Создаёт и возвращает подключение к базе данных с поддержкой именованных столбцов."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    """Создаёт и возвращает подключение с повторными попытками."""
+    max_retries = 5
+    retry_delay = 1
+
+    for _ in range(max_retries):
+        try:
+            conn = psycopg2.connect(
+                DB_URL,
+                cursor_factory=DictCursor,
+                connect_timeout=5
+            )
+            conn.autocommit = False
+            return conn
+        except psycopg2.OperationalError as e:
+            print(f"Попытка {_ + 1} подключения к базе данных не удалась: {e}")
+            if _ < max_retries - 1:
+                sleep(retry_delay)
+    raise RuntimeError("Не удалось подключиться к базе данных после нескольких попыток.")
 
 def init_users_table():
     """Создаёт все таблицы и админа 'superadmin', если не существует."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = Row
-    conn.execute("PRAGMA foreign_keys = ON")
+    conn = psycopg2.connect(DB_URL, cursor_factory=DictCursor)
+    conn.autocommit = False
     cursor = conn.cursor()
 
     try:
         with conn:
-            # Таблицы: users, categories, objects, ingredients, comments, settings
+            # Таблицы остаются те же, но синтаксис слегка изменён
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     username TEXT UNIQUE NOT NULL,
-                    password TEXT NOT NULL,
-                    is_admin INTEGER DEFAULT 0
+                    password_hash TEXT NOT NULL,
+                    is_admin INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
 
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS categories (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     name TEXT NOT NULL,
                     parent_id INTEGER,
                     created_by INTEGER NOT NULL,
@@ -46,7 +70,7 @@ def init_users_table():
 
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS objects (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     name TEXT NOT NULL,
                     description TEXT,
                     technology TEXT,
@@ -62,7 +86,7 @@ def init_users_table():
 
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS ingredients (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     object_id INTEGER NOT NULL,
                     name TEXT NOT NULL,
                     amount REAL NOT NULL,
@@ -73,7 +97,7 @@ def init_users_table():
 
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS comments (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     object_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
                     text TEXT NOT NULL,
@@ -95,15 +119,15 @@ def init_users_table():
             if cursor.fetchone()[0] == 0:
                 cursor.execute("INSERT INTO settings (id, auth_code) VALUES (1, NULL)")
 
-            cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", ("superadmin",))
+            cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (SUPERADMIN_USERNAME,))
             if cursor.fetchone()[0] == 0:
                 cursor.execute(
-                    "INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)",
-                    ("superadmin", "ujkjuhfabz", 1)
+                    "INSERT INTO users (username, password_hash, is_admin) VALUES (%s, %s, %s)",
+                    (SUPERADMIN_USERNAME, generate_password_hash(SUPERADMIN_PASSWORD), 1)
                 )
-                print("✅ Админ-пользователь 'superadmin' создан с паролем 'ujkjuhfabz'")
+                print(f"✅ Суперпользователь '{SUPERADMIN_USERNAME}' создан с паролем из переменной окружения.")
 
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         print(f"❌ Ошибка при инициализации базы данных: {e}")
     finally:
         conn.close()

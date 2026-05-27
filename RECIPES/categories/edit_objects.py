@@ -59,6 +59,7 @@ def edit_object(object_id):
         flash(str(e))
         return redirect(url_for('edit_objects.edit_object', object_id=object_id))
     
+    
 
 @edit_objects_bp.route('/comment/<int:comment_id>/edit', methods=['GET', 'POST'])
 def edit_comment(comment_id):
@@ -72,26 +73,28 @@ def edit_comment(comment_id):
             validate_not_empty(text, 'Текст комментария')
             edit_comment_service(comment_id, text, session['user_id'])
             flash('Комментарий успешно обновлён!')
+            comment = get_comment_by_id(comment_id)
+            # ПРАВИЛЬНО! Передаем object_id, так как комментарий привязан к объекту, а не категории
+            return redirect(url_for('objects.category_page', category_id=comment['object_id']))
         except ValueError as e:
             flash(str(e))
-            return redirect(url_for('edit_objects.edit_comment', comment_id=comment_id))
-
-        comment = get_comment_by_id(comment_id)
-        return redirect(url_for('objects.category_page', category_id=comment['object_id'], object_id=comment['object_id']))
+            return redirect(url_for('edit_objects_bp.edit_comment', comment_id=comment_id))
 
     comment = get_comment_by_id(comment_id)
     validate_object_exists(comment, 'Комментарий не найден.')
 
-    if not check_comment_ownership(session['user_id'], comment['user_id']):
+    if not can_edit(session['user_id'], comment['user_id']):
         flash("Вы не можете редактировать чужой комментарий.")
-        return redirect(url_for('objects.category_page', category_id=comment['object_id']))
+        # ТАКЖЕ ИСПРАВЛЯЕМ ЗДЕСЬ (если маршрут ожидает category_id, а не object_id)
+        return redirect(url_for('objects.category_page', category_id=comment['object_id']))  # Исправлено
 
     session['editing_comment'] = {
         'id': comment_id,
         'text': comment['text'],
         'object_id': comment['object_id']
     }
-    return redirect(url_for('objects.category_page', category_id=comment['object_id']))
+    return render_template('comment_edit.html')
+
 
 
 @edit_objects_bp.route('/category/<int:category_id>/edit', methods=['GET', 'POST'])

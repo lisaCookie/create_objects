@@ -1,84 +1,98 @@
 # RECIPES/users/my_contribution.py
 
+# RECIPES/users/my_contribution.py
+
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from datetime import datetime
 from RECIPES.database.db_init import get_db_connection
-from RECIPES.utils.my_contrib_filters import generate_my_contribution_filters_sql
+from RECIPES.utils.db_filters import build_my_contribution_sql
 
 my_contribution_bp = Blueprint('my_contribution', __name__)
 
 @my_contribution_bp.route('/my-contribution')
 def my_contribution():
     if 'user_id' not in session:
-        flash('Вы должны быть авторизованы, чтобы просмотреть свой вклад.')
+        flash('Авторизуйтесь для просмотра вашего вклада.', 'warning')
         return redirect(url_for('login.login'))
 
     user_id = session['user_id']
-    conn = get_db_connection()
-
-    # Получаем фильтр только по категории — object_id игнорируется
     category_id = request.args.get('category_id')
-    # object_id = request.args.get('object_id')  # УДАЛЕН — не используется
 
-    # Генерируем SQL-параметры (только по category_id или без него)
-    filter_params = generate_my_contribution_filters_sql(user_id=user_id, category_id=category_id)
+    # 1. Получаем SQL-запросы и параметры через рефакторинг-функцию
+    filter_data = build_my_contribution_sql(user_id, category_id)
 
-    # Получаем все категории для выпадающего списка
+    # 2. Инициализируем списки
     categories_for_filter = []
-    with conn:
-        categories_raw = conn.execute("""
-            SELECT id, name, created_at FROM categories WHERE created_by = ? ORDER BY created_at DESC
-        """, (user_id,)).fetchall()
+    objects = []
+    comments = []
 
-        for cat in categories_raw:
-            created_at = datetime.strptime(cat['created_at'], '%Y-%m-%d %H:%M:%S')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        # --- ПОЛУЧАЕМ КАТЕГОРИИ ДЛЯ ФИЛЬТРА ---
+        cursor.execute("""
+            SELECT id, name, created_at
+            FROM categories
+            WHERE created_by = %s
+            ORDER BY created_at DESC
+        """, (user_id,))
+        
+        rows_cat = cursor.fetchall()
+        for row in rows_cat:
+            # Обработка даты (на случай если она приходит строкой или объектом)
+            dt = row[2]
+            if isinstance(dt, str):
+                dt = datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+            
             categories_for_filter.append({
-                'id': cat['id'],
-                'name': cat['name'],
-                'created_at': created_at
+                'id': row[0],
+                'name': row[1],
+                'created_at': dt
             })
 
-    # Инициализируем данные
-    objects_for_display = []
-    comments_for_display = []
-
-    # Обрабатываем результаты: всегда возвращаются 'objects' и 'comments'
-    with conn:
-        # Объекты
-        objects_sql_params = filter_params['objects']
-        results_objects_raw = conn.execute(objects_sql_params['sql'], objects_sql_params['params']).fetchall()
-        for row in results_objects_raw:
-            created_at = datetime.strptime(row['created_at'], '%Y-%m-%d %H:%M:%S')
-            objects_for_display.append({
-                'id': row['id'],
-                'name': row['name'],
-                'description': row['description'],
-                'created_at': created_at,
-                'category_id': row['category_id'],
-                'category_name': row['category_name']
+        # --- ПОЛУЧАЕМ ОБЪЕКТЫ ---
+        cursor.execute(filter_data['objects']['sql'], filter_data['objects']['params'])
+        rows_obj = cursor.fetchall()
+        for row in rows_obj:
+            dt = row[3]
+            if isinstance(dt, str):
+                dt = datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+            
+            objects.append({
+                'id': row[0],
+                'name': row[1],
+                'description': row[2],
+                'created_at': dt,
+                'category_id': row[4],
+                'category_name': row[5]
             })
 
-        # Комментарии
-        comments_sql_params = filter_params['comments']
-        results_comments_raw = conn.execute(comments_sql_params['sql'], comments_sql_params['params']).fetchall()
-        for row in results_comments_raw:
-            created_at = datetime.strptime(row['created_at'], '%Y-%m-%d %H:%M:%S')
-            comments_for_display.append({
-                'id': row['id'],
-                'text': row['text'],
-                'created_at': created_at,
-                'object_name': row['object_name'],
-                'object_id': row['object_id'],
-                'category_name': row['category_name'],
-                'category_id': row['category_id']
+        # --- ПОЛУЧАЕМ КОММЕНТАРИИ ---
+        cursor.execute(filter_data['comments']['sql'], filter_data['comments']['params'])
+        rows_com = cursor.fetchall()
+        for row in rows_com:
+            dt = row[2]
+            if isinstance(dt, str):
+                dt = datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+
+            comments.append({
+                'id': row[0],
+                'text': row[1],
+                'created_at': dt,
+                'object_name': row[3],
+                'object_id': row[4],
+                'category_id': row[5],
+                'category_name': row[6]
             })
 
+    # 3. ПЕРЕДАЕМ ДАННЫЕ В ШАБЛОН
+    # ВАЖНО: Мы передаем и categories, и all_categories_for_filter, 
+    # чтобы удовлетворить требования вашего шаблона.
     return render_template(
         'my_contribution.html',
-        categories=categories_for_filter,
-        objects=objects_for_display,
-        comments=comments_for_display,
-        all_categories_for_filter=categories_for_filter,
-        current_category_id=category_id,
-        current_object_id=None  # Убрано — не используется
+        categories=categories_for_filter,               # Для основного списка (если используется)
+        all_categories_for_filter=categories_for_filter, # ДЛЯ ВЫПАДАЮЩЕГО СПИСКА (критично!)
+        objects=objects,
+        comments=comments,
+        current_category_id=category_id
     )

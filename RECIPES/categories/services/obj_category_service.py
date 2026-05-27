@@ -67,11 +67,18 @@ def edit_category_service(category_id, name, user_id):
     CategoryRepository.update(name.strip(), category_id)
 
 
+
 def delete_category_service(category_id, user_id):
-    is_admin_row = get_db_connection().execute(
-        "SELECT is_admin FROM users WHERE id = ?", (user_id,)
-    ).fetchone()
-    if not is_admin_row or not is_admin_row['is_admin']:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Замените `?` на `%s` для стиля параметров psycopg2 по умолчанию
+    cursor.execute("SELECT is_admin FROM users WHERE id = %s", (user_id,))
+    is_admin_row = cursor.fetchone()
+
+    conn.close()
+
+    if not is_admin_row or not is_admin_row[0]:
         raise ValueError("Только администратор может удалять категории")
 
     category = CategoryRepository.get_by_id(category_id)
