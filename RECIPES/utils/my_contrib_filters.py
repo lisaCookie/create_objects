@@ -1,7 +1,5 @@
 # utils/my_contrib_filters.py
 
-# utils/my_contrib_filters.py
-
 from typing import Dict, Any, Optional
 from .db_filters import build_my_contribution_sql
 

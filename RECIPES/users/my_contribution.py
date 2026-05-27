@@ -1,6 +1,5 @@
 # RECIPES/users/my_contribution.py
 
-# RECIPES/users/my_contribution.py
 
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from datetime import datetime

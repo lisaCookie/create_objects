@@ -22,9 +22,15 @@ flash:
 	docker rm my_flask_app
 	docker run -d -p 5000:5000 --name my_flask_app docker_flask_project
 
-fast:
-	docker-compose down -v 
+
+down-up:
+	docker-compose down
 	docker-compose up --build
+
+clear-build:
+	docker-compose down -v
+	docker-compose up --build
+
 
 logs-compose:
 	docker-compose logs -f
