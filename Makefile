@@ -13,6 +13,9 @@ kill:
 tree:
 	tree -I 'node_modules|.venv|__pycache__|.git|.expo' --dirsfirst
 
+test:
+	uv run pytest
+
 logs:
 	docker logs my_flask_app
 
