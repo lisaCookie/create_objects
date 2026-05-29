@@ -1,6 +1,9 @@
 build:
 	docker build -t docker_flask_project .
 
+sync:
+	uv sync
+
 run:
 	docker run -d -p 5000:5000 --name my_flask_app docker_flask_project
 
@@ -15,6 +18,9 @@ tree:
 
 test:
 	uv run pytest
+
+test-categories:
+	uv run pytest tests/unit/categories/
 
 logs:
 	docker logs my_flask_app

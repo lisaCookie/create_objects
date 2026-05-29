@@ -1,4 +1,4 @@
-# RECIPES/admin/object_movement.py
+# RECIPES/categories/object_movement.py
 
 from flask import Blueprint, jsonify, request, session, render_template
 from RECIPES.database.db_init import get_db_connection

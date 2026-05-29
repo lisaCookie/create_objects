@@ -1,4 +1,5 @@
 # tests/conftest.py
+    # tests/conftest.py
 import pytest
 from flask import Flask
 from unittest.mock import MagicMock
@@ -58,3 +59,4 @@ def mock_db(mocker):
         mocker.patch(target, return_value=mock_conn)
 
     return mock_cursor, mock_conn
+
