@@ -1,15 +1,16 @@
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+from flask import Flask
+from unittest.mock import patch
+
 # 1. Имитируем структуру пакета psycopg2
 mock_psycopg2 = MagicMock()
 mock_extras = MagicMock()
 sys.modules["psycopg2"] = mock_psycopg2
 sys.modules["psycopg2.extras"] = mock_extras
 
-import pytest
-from flask import Flask
-from unittest.mock import patch
 
 @pytest.fixture
 def app():

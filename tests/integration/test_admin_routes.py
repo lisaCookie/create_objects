@@ -1,7 +1,7 @@
 # tests/integration/test_admin_routes.py
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 @pytest.fixture
 def mock_services(mocker):

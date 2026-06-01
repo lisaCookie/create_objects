@@ -1,5 +1,8 @@
 import sys
 from unittest.mock import MagicMock
+import pytest
+from unittest.mock import patch
+from flask import Flask
 
 # 1. Имитируем psycopg2
 mock_psycopg2 = MagicMock()
@@ -7,9 +10,6 @@ mock_extras = MagicMock()
 sys.modules["psycopg2"] = mock_psycopg2
 sys.modules["psycopg2.extras"] = mock_extras
 
-import pytest
-from unittest.mock import patch
-from flask import Flask
 
 @pytest.fixture
 def app():

@@ -1,7 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
 from RECIPES.categories.validation import (
-    check_authentication, 
     validate_object_exists, 
     validate_not_empty, 
     check_comment_ownership

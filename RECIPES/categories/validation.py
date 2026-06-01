@@ -1,6 +1,6 @@
 # RECIPES/categories/validation.py
 
-from flask import session, flash, redirect, url_for
+from flask import session
 
 def check_authentication():
     """Проверяет авторизацию пользователя."""

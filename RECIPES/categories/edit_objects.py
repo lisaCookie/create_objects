@@ -5,7 +5,7 @@ from RECIPES.categories.services.object_service import edit_obj, get_object_by_i
 from RECIPES.categories.services.obj_category_service import  edit_category_service, get_category_detail_owner_check, get_category_by_id
 from RECIPES.categories.services.obj_comment_service import edit_comment_service, get_comment_by_id, can_edit
 from RECIPES.categories.services.obj_ingredient_service import parse_ingredients_for_object, get_ingredients_by_object_id
-from RECIPES.categories.validation import check_authentication, validate_object_exists, validate_not_empty, check_comment_ownership
+from RECIPES.categories.validation import check_authentication, validate_object_exists, validate_not_empty
 
 
 edit_objects_bp = Blueprint('edit_objects', __name__)

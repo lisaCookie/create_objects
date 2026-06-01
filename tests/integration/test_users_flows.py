@@ -1,7 +1,5 @@
 # tests/integration/test_users_flows.py
-import pytest
 from werkzeug.security import generate_password_hash
-from unittest.mock import MagicMock
 
 # Класс-помощник, чтобы мок работал и как кортеж user[0], и как словарь user['is_admin']
 class MockRow(dict):

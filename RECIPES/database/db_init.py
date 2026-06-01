@@ -2,7 +2,6 @@
 import os
 import psycopg2
 from psycopg2.extras import DictCursor
-from psycopg2 import sql
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 from time import sleep

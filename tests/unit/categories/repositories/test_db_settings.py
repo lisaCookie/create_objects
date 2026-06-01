@@ -1,6 +1,4 @@
-import pytest
 from unittest.mock import MagicMock, patch
-# Путь к функциям из вашего файла
 from RECIPES.database.db_settings import get_auth_code, update_settings_auth_code
 
 @patch("RECIPES.database.db_settings.get_db_connection")

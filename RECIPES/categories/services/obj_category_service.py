@@ -1,7 +1,6 @@
 # RECIPES/categories/services/obj_category_service.py
 from RECIPES.database.db_init import get_db_connection
 from RECIPES.categories.repositories.category_repository import CategoryRepository
-from RECIPES.categories.services.admin_permission_service import has_admin_access
 from RECIPES.categories.validation import validate_not_empty, check_category_ownership, validate_object_exists
 
 

@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import MagicMock, patch
-import psycopg2
 from RECIPES.database.db_init import get_db_connection, init_users_table
 
 @patch("RECIPES.database.db_init.psycopg2.connect")

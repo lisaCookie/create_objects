@@ -5,15 +5,11 @@ from RECIPES.utils.db_filters import (
     build_users_filter_sql,
     build_categories_filter_sql,
     build_objects_filter_sql,
-    build_comments_filter_sql,
     search_objects_sql,
     build_my_contribution_sql
 )
 from RECIPES.utils.admin_filters import (
     build_users_filter_sql_wrapper,
-    build_categories_filter_sql_wrapper,
-    build_objects_filter_sql_wrapper,
-    build_comments_filter_sql_wrapper
 )
 from RECIPES.utils.filters import filter_categories_by_search
 from RECIPES.utils.my_contrib_filters import generate_my_contribution_filters_sql

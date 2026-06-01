@@ -1,6 +1,5 @@
 # RECIPES/utils/admin_filters.py
 
-from typing import Optional
 
 from typing import Optional
 from .db_filters import build_users_filter_sql, build_categories_filter_sql, build_objects_filter_sql, build_comments_filter_sql

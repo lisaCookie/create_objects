@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from flask import Flask
 from RECIPES.categories.edit_objects import edit_objects_bp
 

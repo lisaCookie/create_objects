@@ -1,9 +1,8 @@
 # RECIPES/categories/services/obj_comment_service.py
 
 from RECIPES.categories.repositories.comment_repository import CommentRepository
-from RECIPES.database.db_init import get_db_connection
 from RECIPES.categories.services.admin_permission_service import has_admin_access
-from RECIPES.categories.validation import validate_not_empty, validate_object_exists, check_comment_ownership
+from RECIPES.categories.validation import validate_not_empty, validate_object_exists
 
 
 def get_comments_by_object_id(object_id):

@@ -42,7 +42,7 @@ def register():
                 flash('Регистрация успешна! Перейдите на страницу входа.', 'success')
                 return redirect(url_for('login.login'))
 
-        except Exception as e:
+        except Exception:
             flash('Ошибка регистрации. Попробуйте позже.', 'danger')
             return render_template('register.html', form=form)
 

@@ -1,20 +1,20 @@
 # RECIPES/users/login
 
-from flask import Blueprint, render_template, redirect, url_for, flash, session, request
+from flask import Blueprint, render_template, redirect, url_for, flash, session
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from RECIPES.database.db_init import get_db_connection
 from RECIPES.database.db_settings import get_auth_code
-import hashlib
+
 
 login_bp = Blueprint('login', __name__, template_folder='../templates', static_folder='../static')
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
-    auth_code = StringField('Authorization Code (if required)', validators=[])  # Обязательное поле
+    auth_code = StringField('Authorization Code (if required)', validators=[])
     submit = SubmitField('Login')
 
 @login_bp.route('/login', methods=['GET', 'POST'])
@@ -57,7 +57,7 @@ def login():
                 flash('Вход выполнен успешно!', 'success')
                 return redirect(url_for('index'))
 
-        except Exception as e:
+        except Exception:
             flash('Ошибка сервера. Попробуйте позже.', 'danger')
             return render_template('login.html', form=form)
 
