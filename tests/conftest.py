@@ -15,10 +15,12 @@ def app():
     from RECIPES.users.login import login_bp
     from RECIPES.users.register import register_bp
     from RECIPES.users.my_contribution import my_contribution_bp
+    from RECIPES.admin.admin import admin_bp
 
     app.register_blueprint(login_bp)
     app.register_blueprint(register_bp)
     app.register_blueprint(my_contribution_bp)
+    app.register_blueprint(admin_bp)
 
     return app
 
