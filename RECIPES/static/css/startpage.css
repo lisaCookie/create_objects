@@ -1,148 +1,62 @@
-/* --- НАВИГАЦИОННАЯ ПАНЕЛЬ --- */
-.nav-bar {
-    background-color: #3a5f4a; /* тёмно-зелёный */
-    padding: 1.2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #e8d5c5; /* светло-бежевый */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+/* ОБЩИЙ ФОН СТРАНИЦЫ */
+body {
+    background-color: #cccfd1 !important; /* Добавлено !important для перекрытия Bootstrap */
 }
 
-.nav-bar h3 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #e8d5c5;
+/* Общие стили для контейнера формы создания категории */
+.category-form-container {
+    max-width: 700px;          /* Ограничиваем ширину всей формы */
+    margin: 20px auto;         /* Центрируем форму по горизонтали */
+    padding: 25px;             /* Внутренние отступы */
+    border: 2px solid silver;  /* Та самая серебристая рамка */
+    border-radius: 12px;       /* Скругление углов */
+    background-color: #f0ebebce; /* Белый фон для формы */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Легкая тень для объема */
 }
 
-.nav-bar a {
-    color: #e8d5c5;
-    text-decoration: none;
-    margin-left: 1.5rem;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.nav-bar a:hover {
-    color: #a8c9b0; /* светло-зелёный при наведении */
-    text-decoration: underline;
-}
-
-/* --- СООБЩЕНИЯ --- */
-.flash {
-    background-color: #e8f5e9; /* очень светлый зелёный фон */
-    color: #2e7d32; /* тёмно-зелёный текст */
-    padding: 0.75rem;
-    margin: 0.75rem 0;
-    border-radius: 6px;
-    border-left: 4px solid #4caf50;
-    font-weight: 500;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/* --- ФОРМА СОЗДАНИЯ КАТЕГОРИИ --- */
-.category-form {
-    margin: 2.5rem auto;
-    max-width: 600px;
-    padding: 1.5rem;
-    background-color: #f7f2eb; /* бежевый фон */
-    border: 1px solid #d4c6b8;
-    border-radius: 10px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-}
-
-.category-form h3 {
-    margin-top: 0;
-    color: #3a5f4a;
-    font-size: 1.4rem;
-    border-bottom: 2px solid #d4c6b8;
-    padding-bottom: 0.5rem;
-}
-
-.category-form input[type="text"] {
-    width: 75%;
-    padding: 0.75rem;
-    font-size: 1rem;
-    border: 1px solid #d4c6b8;
-    border-radius: 6px;
-    background-color: #fff;
-    color: #3a5f4a;
-    box-sizing: border-box;
-}
-
-.category-form input[type="text"]:focus {
-    outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
-
-.category-form button {
-    padding: 0.75rem 1.5rem;
-    margin-left: 1rem;
-    background-color: #4caf50; /* ярко-зелёная кнопка */
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-
-.category-form button:hover {
-    background-color: #388e3c;
-    transform: translateY(-1px);
-}
-
-.category-form button:active {
-    transform: translateY(0);
-}
-
-/* --- СПИСОК КАТЕГОРИЙ --- */
-.categories-list {
-    margin-top: 2.5rem;
-}
-
-.categories-list h3 {
-    color: #3a5f4a;
-    margin-bottom: 1rem;
-    font-size: 1.6rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #d4c6b8;
-}
-
-.category-item {
-    background-color: #f7f2eb; /* бежевый фон */
-    padding: 1.2rem;
-    margin: 1rem 0;
-    border-radius: 8px;
-    border-left: 5px solid #4caf50; /* зелёная полоса слева */
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-    color: #3a5f4a; /* тёмно-зелёный текст — НЕ БЕЛЫЙ! */
-    font-size: 1.05rem;
-    line-height: 1.5;
-}
-
-.category-item strong {
-    font-weight: 700;
-    color: #2e7d32;
-}
-
-.category-item small {
-    display: block;
-    margin-top: 0.5rem;
-    color: #6d8a7c; /* тёплый серо-зелёный */
-    font-style: italic;
-    font-size: 0.9rem;
-}
-
-.categories-list p {
-    color: #6d8a7c;
-    font-style: italic;
+/* Заголовок внутри формы */
+.category-form-container h3 {
     text-align: center;
-    padding: 2rem;
-    background-color: #f7f2eb;
-    border-radius: 8px;
-    margin: 1rem 0;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Исправление Bootstrap сетки внутри формы */
+@media (min-width: 768px) {
+    .category-form-container .row.g-3 {
+        display: flex;
+    }
+}
+
+/* Стили для вашей кастомной кнопки */
+.my-custom-btn {
+    background-color: #d2d3d0;
+    color: rgb(111, 113, 119);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+/* ПРИ НАВЕДЕНИИ НА КНОПКУ "ОТКРЫТЬ" СТАНОВИТСЯ ТЕМНО-СЕРОГО ЦВЕТА */
+.my-custom-btn:hover {
+    background-color: #333333;
+    color: white;
+}
+
+/* Стили для карточек категорий */
+.card {
+    background-color: #f0ebebce; /* ФОН ДЛЯ СОЗДАННЫХ КАТЕГОРИЙ */
+}
+
+.category-item-title {
+    color: #3f3f3f;
+    font-weight: bold;
+}
+
+.card-text-muted {
+    color: #6c757d;
 }

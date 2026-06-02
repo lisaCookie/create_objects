@@ -2,7 +2,7 @@
 
 /* Цвета и шрифты — единая палитра */
 :root {
-  --bg-primary: #f5f0e6;
+  --bg-primary: #cccfd1;
   --bg-secondary: #e8e0d0;
   --accent: #5a756a;
   --accent-hover: #465d55;

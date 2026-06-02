@@ -17,7 +17,7 @@
     {% endfor %}
   {% endif %}
 {% endwith %}
-<form method="POST" action="{{ url_for('register.register') }}"> {# Явно указываем action #}
+<form method="POST" action="{{ url_for('register.register') }}">
     {{ form.hidden_tag() }}
     <p>
         {{ form.username.label }}<br>
