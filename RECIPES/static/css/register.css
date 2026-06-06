@@ -1,0 +1,64 @@
+body, html {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            align-items: center; /* Центр по вертикали */
+            justify-content: center; /* Центр по горизонтали */
+            background-color: #cccfd1;
+        }
+
+        /* Контейнер для формы */
+        .register-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background: #cccfd1 ;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Легкая тень*/
+            text-align: center;
+        }
+
+        /* 2 & 3. Округление и серебристая рамка для полей ввода */
+        input[type="text"], 
+        input[type="password"], 
+        input[type="email"] {
+            width: 100%;
+            padding: 10px 15px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 2px solid #C0C0C0; /* Серебристая рамка (Silver) */
+            border-radius: 10px;       /* Округление */
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        /* Эффект при нажатии на поле (фокусе) */
+        input:focus {
+            border-color: #A9A9A9;
+        }
+
+        /* Стилизация кнопки */
+        input[type="submit"] {
+            width: 50%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background-color: #bbc0c7;
+            color: rgb(22, 43, 233);
+            cursor: pointer;
+        }
+
+        .flash {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        .login-link {
+            display: block;
+            margin-top: 15px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }

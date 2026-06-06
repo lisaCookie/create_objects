@@ -108,7 +108,6 @@ function renderNode(container, nodeData, isRoot = false) {
 
     const icon = document.createElement('span');
     icon.className = 'icon';
-    icon.textContent = '📄';
 
     const objectLink = document.createElement('a');
     objectLink.href = url_for('objects.object_detail', { object_id: nodeId });

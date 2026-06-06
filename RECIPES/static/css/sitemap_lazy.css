@@ -1,4 +1,9 @@
 /* RECIPES/static/css/sitemap_lazy.css */
+body {
+    background-color: #cccfd1 !important;
+}
+
+/* RECIPES/static/css/sitemap_lazy.css */
 
 .sitemap-container {
   margin: 1rem 0;
@@ -10,8 +15,7 @@
 
 .sitemap-category {
   padding: 0.6rem 0.8rem;
-  border-left: 3px solid #0d6efd;
-  background-color: #f8f9fa;
+  background-color: #cccfd1;
   border-radius: 0 4px 4px 0;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -21,7 +25,7 @@
 }
 
 .sitemap-category:hover {
-  background-color: #e9ecef;
+  background-color: #afb1b3;
 }
 
 .sitemap-category .toggle-icon {
@@ -38,7 +42,7 @@
 .sitemap-children {
   margin-left: 20px;
   margin-top: 0.3rem;
-  border-left: 1px dashed #ccc;
+  border-left: 1px dashed #cccfd1;
   padding-left: 1rem;
   display: none;
 }
@@ -50,7 +54,7 @@
 .sitemap-object {
   padding: 0.4rem 0.6rem;
   margin: 0.2rem 0;
-  background-color: #f1f3f4;
+  background-color: #cccfd1;
   border-radius: 4px;
   font-size: 0.95rem;
   display: flex;
@@ -69,7 +73,6 @@
 }
 
 .sitemap-header {
-  border-bottom: 2px solid #dee2e6;
   padding-bottom: 1rem;
   margin-bottom: 2rem;
 }
@@ -80,7 +83,7 @@ a {
 }
 
 a:hover {
-  color: #0d6efd;
+  color: #737578;
 }
 
 .sitemap-category > a {

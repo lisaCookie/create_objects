@@ -77,16 +77,14 @@ def add_comment(object_id):
     text = request.form.get('comment_text', '').strip()
     if not text:
         flash('Comment cannot be empty.')
-        return redirect(url_for('objects.category_page', category_id=object_id))
+        return redirect(url_for('objects.object_detail', object_id=object_id))
 
     create_comment(object_id, session['user_id'], text)
     flash('Comment added successfully!')
 
-    obj = get_object_by_id(object_id)
-    if obj:
-        return redirect(url_for('objects.category_page', category_id=obj['category_id']))
-    else:
-        return redirect(url_for('index'))
+    # Редирект на страницу деталей объекта
+    return redirect(url_for('objects.object_detail', object_id=object_id))
+
 
 
 # --- Создание подкатегории ---

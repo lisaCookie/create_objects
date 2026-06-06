@@ -1,0 +1,18 @@
+/* static/css/edit.css */
+
+body {
+    background-color: #cccfd1 !important; /* Добавлено !important для перекрытия Bootstrap */
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #b2b4b6;
+}
+
+.back-link {
+    margin-bottom: 20px;
+}

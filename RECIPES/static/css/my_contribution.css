@@ -1,4 +1,7 @@
 /* Стили для списка и карточек */
+body {
+    background-color: #cccfd1 !important; /* Добавлено !important для перекрытия Bootstrap */
+}
 .admin-panel {
     background-color: #f8f9fa;
     border-radius: 10px;

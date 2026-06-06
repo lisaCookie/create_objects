@@ -1,0 +1,87 @@
+/* --- 1. ОБЩИЕ НАСТРОЙКИ --- */
+body {
+    background-color: #d7d7d7;
+    min-height: 100vh;
+}
+
+.recipe-card {
+    background-color: #bfc7d0;
+    color: rgb(40, 38, 38);
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* --- 2. ЗАГОЛОВКИ (Названия разделов) --- */
+.section-title {
+    font-size: 1.1rem !important;
+    font-weight: 700;
+    color: black !important;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    display: block;
+    text-align: left;
+}
+
+/* --- 3. ТЕКСТ (Значения) --- */
+.content-text {
+    color: #1a1a1a !important;
+    font-size: 1rem;
+}
+
+.meta-text {
+    color: #555 !important;
+    font-size: 0.9rem;
+}
+
+/* --- 4. ПОЛЯ (БЛОКИ С РАМКАМИ) --- */
+
+/* Поля Ингредиентов */
+.ingredients-container {
+    display: table; /* Сжимает контейнер по самому длинному элементу */
+    margin: 0 auto; /* Центрирует контейнер целиком */
+}
+
+.ingredient-field {
+    background-color: #bfc7d0 !important; 
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    text-align: left;
+    display: block;
+    width: 100%; /* Все блоки будут одной ширины (по самому длинному) */
+    font-weight: bold; 
+}
+
+/* Поле Технологии */
+.technology-field {
+    background-color: #ede7e7 !important;
+    border: 1px solid #b8b8a0 !important; 
+    border-radius: 10px;
+    padding: 20px;
+    text-align: left;
+    margin-top: 10px;
+}
+
+/* Поля Комментариев */
+.comment-field {
+    background-color: #bfc7d0 !important;
+    padding: 15px;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+/* --- 5. ПРОЧЕЕ --- */
+.form-control {
+    border: 1px solid #b8b8a0;
+    background-color: #bfc7d0;
+}
+.form-control:focus {
+    background-color: #fff;
+    box-shadow: none;
+    border: 1px solid #0d6efd;
+}

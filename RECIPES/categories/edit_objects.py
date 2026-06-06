@@ -16,7 +16,7 @@ def edit_object(object_id):
         flash('Вы должны быть авторизованы для редактирования.')
         return redirect(url_for('login.login'))
 
-    obj = get_object_by_id(object_id)
+    obj = get_object_by_id(object_id, user_id=session['user_id']) 
     validate_object_exists(obj, 'Объект не найден.')
 
     try:
@@ -58,9 +58,8 @@ def edit_object(object_id):
     except ValueError as e:
         flash(str(e))
         return redirect(url_for('edit_objects.edit_object', object_id=object_id))
-    
-    
 
+    
 @edit_objects_bp.route('/comment/<int:comment_id>/edit', methods=['GET', 'POST'])
 def edit_comment(comment_id):
     if not check_authentication():
@@ -75,7 +74,7 @@ def edit_comment(comment_id):
             flash('Комментарий успешно обновлён!')
             comment = get_comment_by_id(comment_id)
             # ПРАВИЛЬНО! Передаем object_id, так как комментарий привязан к объекту, а не категории
-            return redirect(url_for('objects.category_page', category_id=comment['object_id']))
+            return redirect(url_for('objects.object_detail', object_id=comment['object_id']))
         except ValueError as e:
             flash(str(e))
             return redirect(url_for('edit_objects_bp.edit_comment', comment_id=comment_id))
