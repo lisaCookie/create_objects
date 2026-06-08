@@ -2,8 +2,8 @@
 
 /* Цвета и шрифты — единая палитра */
 :root {
-  --bg-primary: #cccfd1;
-  --bg-secondary: #e8e0d0;
+  --bg-primary: #cccfd1 !important;
+  --bg-secondary: #cccfd1;
   --accent: #5a756a;
   --accent-hover: #465d55;
   --text: #3a3a3a;

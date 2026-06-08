@@ -115,4 +115,4 @@ def test_move_object_not_found(mock_get_db, client):
 
     response = client.post('/admin/move_object', data={'object_id': 99, 'new_category_id': 2})
     assert response.status_code == 404
-    assert 'Object not found' in response.json['error']
+    assert 'Объект не найден' in response.json['error']

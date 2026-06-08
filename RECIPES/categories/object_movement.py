@@ -64,7 +64,7 @@ def move_object():
     new_category_id = request.form.get('new_category_id')
 
     if not object_id or not new_category_id:
-        return jsonify({'error': 'Object ID and category ID are required'}), 400
+        return jsonify({'error': 'ID объекта и ID категории обязательны'}), 400
 
     conn = get_db_connection()
     try:
@@ -77,7 +77,7 @@ def move_object():
             obj = cursor.fetchone()
 
             if not obj:
-                return jsonify({'error': 'Object not found'}), 404
+                return jsonify({'error': 'Объект не найден'}), 404
 
             # Проверяем существование новой категории
             cursor.execute("""
@@ -86,18 +86,18 @@ def move_object():
             cat = cursor.fetchone()
 
             if not cat:
-                return jsonify({'error': 'Target category not found'}), 404
+                return jsonify({'error': 'Целевая категория не найдена'}), 404
 
             # Проверяем, не уже ли объект в этой категории
             if obj['category_id'] == int(new_category_id):
-                return jsonify({'error': 'Object is already in this category'}), 400
+                return jsonify({'error': 'Объект уже находится в этой категории'}), 400
 
             # Выполняем перемещение
             cursor.execute("""
                 UPDATE objects SET category_id = %s WHERE id = %s
             """, (new_category_id, object_id))
             conn.commit()
-            return jsonify({'success': True, 'message': 'Object moved successfully!'})
+            return jsonify({'success': True, 'message': 'Объект успешно перемещен!'})
     except Exception as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
     finally:

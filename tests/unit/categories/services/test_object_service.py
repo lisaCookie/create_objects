@@ -22,7 +22,7 @@ class TestObjectService:
             delete_obj(10, 2)
 
     def test_edit_obj_success(self, mocks):
-        self.mock_repo.get_by_id.return_value = {'created_by': 1}
+        self.mock_repo.get_dependencies.return_value = {'created_by': 1}
         self.mock_admin.return_value = False
         self.mock_repo.get_by_name.return_value = None # Name unique
         
@@ -33,7 +33,7 @@ class TestObjectService:
         self.mock_repo.add_ingredients.assert_called()
 
     def test_edit_obj_duplicate_name(self, mocks):
-        self.mock_repo.get_by_id.return_value = {'created_by': 1}
+        self.mock_repo.get_dependencies.return_value = {'created_by': 1}
         self.mock_admin.return_value = False
         self.mock_repo.get_by_name.return_value = True # Simulate duplicate
         

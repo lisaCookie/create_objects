@@ -15,7 +15,7 @@ def delete_object(object_id):
         flash('Вы должны быть авторизованы для удаления объекта.')
         return redirect(url_for('login.login'))
 
-    obj = get_object_by_id(object_id)
+    obj = get_object_by_id(object_id, user_id=session['user_id'])
     validate_object_exists(obj, 'Объект не найден.')
 
     try:

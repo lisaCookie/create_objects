@@ -20,7 +20,10 @@ class TestEditObjectsRoutes(unittest.TestCase):
         mock_get.return_value = {'id': 1, 'category_id': 5}
         mock_ingredients.return_value = []
         mock_url_for.return_value = '/category/5'
-        mock_render.return_value = "Mocked HTML" # Возвращаем заглушку вместо ошибки
+        mock_render.return_value = "Mocked HTML"
+
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = 1
 
         response = self.client.get('/object/1/edit')
         self.assertEqual(response.status_code, 200)
