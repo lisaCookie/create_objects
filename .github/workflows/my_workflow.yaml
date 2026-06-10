@@ -56,7 +56,7 @@ jobs:
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           coverage run -m pytest tests/ && coverage report
-          uv run coverage xml -o coverage.xml
+          "$HOME/.local/bin/uv" run coverage xml -o coverage.xml
 
   build:
     name: Build Docker image
