@@ -35,6 +35,7 @@ jobs:
 
       - name: Set up environment variables
         run: |
+          echo "SUPERADMIN_USERNAME=${{ secrets.SUPERADMIN_USERNAME }}" >> $GITHUB_ENV
           echo "SUPERADMIN_PASSWORD=${{ secrets.SUPERADMIN_PASSWORD }}" >> $GITHUB_ENV
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> $GITHUB_ENV
           echo "SECRET_KEY_DB=${{ secrets.SECRET_KEY_DB }}" >> $GITHUB_ENV
