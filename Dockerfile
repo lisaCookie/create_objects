@@ -15,4 +15,4 @@ RUN pip install flask flask_wtf wtforms
 COPY . .
 
 # Запускаем приложение
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "app:app"]
