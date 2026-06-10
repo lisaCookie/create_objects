@@ -16,11 +16,6 @@ kill:
 tree:
 	tree -I 'node_modules|.venv|__pycache__|.git|.expo' --dirsfirst
 
-test:
-	uv run pytest
-
-test-categories:
-	uv run pytest tests/unit/categories/
 
 logs:
 	docker logs my_flask_app
@@ -68,4 +63,3 @@ test-integration:
 
 lint:
 	ruff check .
-
