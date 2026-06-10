@@ -54,7 +54,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          uv run coverage run -m pytest --tb=short
+          coverage run -m pytest tests/ && coverage report
           uv run coverage xml -o coverage.xml
 
       - name: Run unit tests
