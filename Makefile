@@ -47,7 +47,7 @@ logs-compose:
 	docker-compose logs -f web
 
 test:
-	uv run pytest
+	coverage run -m pytest tests/ && coverage report
 
 test-admin:
 	uv run pytest tests/unit/admin/
