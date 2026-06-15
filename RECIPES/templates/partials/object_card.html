@@ -1,4 +1,4 @@
-<!-- templates/partials/object_card.html (изменённый вариант) -->
+<!-- templates/partials/object_card.html -->
 <div class="card accordion-item shadow-sm mb-3">
   <div class="card-header d-flex align-items-center">
     <h5 class="card-title m-0">{{ item.object.name }}</h5>
@@ -31,20 +31,35 @@
           <small class="text-muted">Ингредиенты:</small>
           <ul class="list-unstyled">
             {% for ing in item.ingredients %}
-              <li>{{ ing.name }} — {{ ing.amount }} {{ ing.unit }}</li>
+              <li>
+                {{ ing.name }} — {{ ing.amount }}
+                {% set unit = ing.unit|string|lower|trim %} 
+                {% if ing.unit == 'ml' %}
+                  мл
+                {% elif ing.unit == 'g' %}
+                  г
+                {% elif ing.unit == 'pc' %}
+                  шт
+                {% else %}
+                  {{ ing.unit }}
+                {% endif %}
+              </li>
             {% endfor %}
           </ul>
         </div>
       {% endif %}
 
-      {% if item.object.technology %}
-        <div class="mt-2">
-          <small class="text-muted">Технология приготовления:</small>
-          <p class="card-text small">{{ item.object.technology }}</p>
-        </div>
-      {% endif %}
+      {% if session.get('user_id') %}
+        {% if item.object.technology %}
+          <div class="mt-2">
+            <small class="text-muted">Технология приготовления:</small>
+            <p class="card-text small">{{ item.object.technology }}</p>
+          </div>
+        {% endif %}
 
-      {% include 'partials/comments_section.html' with context %}
+        {% include 'partials/comments_section.html' with context %}
+      {% endif %}
+     
     </div>
   </div>
 </div>

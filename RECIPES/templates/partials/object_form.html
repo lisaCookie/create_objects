@@ -26,7 +26,7 @@
         {% for ing in ingredients %}
           <div class="ingredient-row mb-3 d-flex gap-2">
             <input type="text" name="ingredient_name[]" class="form-control" value="{{ ing.name }}" required />
-            <input type="number" name="ingredient_amount[]" class="form-control" value="{{ ing.amount }}" min="0" required style="width: 80px;" />
+            <input type="number" name="ingredient_amount[]" class="form-control" value="{{ ing.amount }}" min="0" step="any" required style="width: 80px;" />
             <select name="ingredient_unit[]" class="form-select" required style="width: 60px;">
               <option value="ml" {% if ing.unit == 'ml' %}selected{% endif %}>мл</option>
               <option value="g" {% if ing.unit == 'g' %}selected{% endif %}>г</option>
@@ -38,7 +38,7 @@
       {% else %}
         <div class="ingredient-row mb-3 d-flex gap-2">
           <input type="text" name="ingredient_name[]" class="form-control" placeholder="Название" required />
-          <input type="number" name="ingredient_amount[]" class="form-control" placeholder="Кол-во" min="0" required style="width: 80px;" />
+          <input type="number" name="ingredient_amount[]" class="form-control" placeholder="Кол-во" min="0" step="any" required style="width: 80px;" />
           <select name="ingredient_unit[]" class="form-select" required style="width: 60px;">
             <option value="ml">мл</option>
             <option value="g">г</option>

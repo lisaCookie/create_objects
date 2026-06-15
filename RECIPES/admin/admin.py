@@ -8,6 +8,7 @@ from RECIPES.admin.services import (
     comment_service,
     auth_service,
 )
+from RECIPES.database.db_init import get_db_connection
 
 admin_bp = Blueprint('admin', __name__, template_folder='../templates', static_folder='../static')
 
@@ -96,6 +97,24 @@ def delete_comment_admin(comment_id):
     comment_service.delete_comment(comment_id)
     flash('Комментарий удалён админом.')
     return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route('/users_list')
+def users_list():
+    if 'user_id' not in session:
+        flash('Вы должны быть авторизованы.')
+        return redirect(url_for('login.login'))
+    if not _is_admin():
+        flash('У вас нет прав администратора.')
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT username, created_at FROM users ORDER BY created_at DESC")
+        users = cursor.fetchall()
+
+    return render_template('admin/users_list.html', users=users)
 
 # --- Обновление auth_code ---
 @admin_bp.route('/update_auth_code', methods=['POST'])
