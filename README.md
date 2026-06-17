@@ -53,7 +53,7 @@ SECRET_KEY_DB=db_security_key
 POSTGRES_DB=recipes
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres_password
-
+```
 
 #### Основные команды:
 ```bash
