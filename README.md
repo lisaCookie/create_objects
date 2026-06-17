@@ -44,19 +44,26 @@ Create Objects — это веб-платформа для создания, р�
 ### Конфигурация
 Создайте .env файл на основе шаблона
 
-SECRET_KEY=
-SUPERADMIN_USERNAME=
+## Конфигурация
+Создайте .env файл на основе шаблона
+```ini
+SECRET_KEY=your_secret_key_here
+SUPERADMIN_USERNAME=superadmin
 SUPERADMIN_PASSWORD=postgres_password
 
-DATABASE_URL=postgresql://postgres_user:postgres_password:5432/recipes
-SECRET_KEY_DB=
+DATABASE_URL=postgresql://postgres:postgres_password@localhost:5432/recipes
+SECRET_KEY_DB=db_security_key
+
 POSTGRES_DB=recipes
-POSTGRES_USER=
-POSTGRES_PASSWORD=
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres_password
 
 
 #### Основные команды:
 ```bash
+# Сделать файл исполняемым
+chmod +x entrypoint.sh
+
 # Собрать и запустить контейнер
 make up
 

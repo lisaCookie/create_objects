@@ -4,3 +4,4 @@
 coverage.xml
 .python-version
 __pycache__
+.myenv
