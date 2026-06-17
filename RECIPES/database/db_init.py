@@ -38,7 +38,6 @@ def get_db_connection():
 def init_users_table():
     """Создаёт все таблицы и админа 'superadmin', если не существует."""
     conn = psycopg2.connect(DB_URL, cursor_factory=DictCursor)
-    # ВАЖНО: Отключаем autocommit, чтобы управлять транзакцией вручную
     conn.autocommit = False 
     cursor = conn.cursor()
 
@@ -127,14 +126,13 @@ def init_users_table():
             )
             print(f"✅ Суперпользователь '{SUPERADMIN_USERNAME}' создан.")
 
-        # КРИТИЧЕСКИ ВАЖНО: Фиксируем изменения!
         conn.commit()
         print("✅ Все таблицы и данные успешно инициализированы.")
 
     except psycopg2.Error as e:
-        conn.rollback()  # Откатываем всё при ошибке
+        conn.rollback()
         print(f"❌ Ошибка при инициализации базы данных: {e}")
-        raise e # Пробрасываем ошибку дальше, чтобы docker-compose понял, что инициализация провалена
+        raise e
     finally:
         cursor.close()
         conn.close()
