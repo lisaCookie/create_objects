@@ -37,7 +37,6 @@ def teardown_db(exception):
     if db is not None:
         db.close()
 
-# --- [КОНЕЦ НОВОГО БЛОКА] ---
 
 # Регистрируем блюпринты
 app.register_blueprint(register_bp, url_prefix='/')
@@ -62,7 +61,6 @@ def get_category_by_id_global(category_id):
 # Главная страница
 @app.route("/", methods=['GET'])
 def index():
-    # Теперь не нужно conn = get_db_connection(), берем из g.db
     conn = g.db
    
     # Получаем все категории с иерархией
@@ -94,7 +92,7 @@ def create_category():
         flash('Название категории не должно быть пустым.')
         return redirect(url_for('index'))
 
-    conn = g.db # Используем g.db
+    conn = g.db
     try:
         with conn: # Автоматический commit/rollback
             cursor = conn.cursor()
@@ -128,6 +126,6 @@ if __name__ == "__main__":
     try:
         sleep(3)  # Задержка для запуска PostgreSQL
         init_users_table()
-        app.run(host="0.0.0.0", port=5000, debug=True)
+        app.run(host="127.0.0.1", port=5000, debug=True)
     except Exception as e:
         print(f"Ошибка при запуске приложения: {e}")

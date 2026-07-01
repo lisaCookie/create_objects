@@ -16,8 +16,6 @@ COPY pyproject.toml .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir .
 
-RUN pip install flask flask_wtf wtforms gunicorn
-
 # Копируем ВСЕ файлы проекта (включая новый entrypoint.sh)
 COPY . .
 
